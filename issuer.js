@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadFooter();              // Load second → No UI flicker
 
     // Page-specific initialization
-    if (path.endsWith("/index.html")) initLoginPage();
+    if (path.endsWith("/")) initLoginPage();
     else if (path.endsWith("addEarner.html")) initAddEarnerPage();
     else if (path.endsWith("earnerList.html")) initEarnerListPage();
 
