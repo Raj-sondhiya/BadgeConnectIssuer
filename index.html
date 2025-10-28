@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issuer Login </title>
+
+    <!-- Bootstrap + FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container text-center">
+        <div class="mb-3">
+            <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center bg-info"
+                style="width: 80px; height: 80px;">
+                <div><i class="fa fa-certificate" style="font-size: 50px; color: white;" aria-hidden="true"></i></div>
+            </div>
+        </div>
+        <h4 class="fw-bold mb-2">Welcome to BadgeConnect Issuer Login </h4>
+        <p id="form-subtitle" class="text-muted small mb-2">Please select your login method</p>
+
+        <!-- Login Method Selection -->
+        <div id="method-selection">
+            <div class="d-flex justify-content-center gap-2 flex">
+                <button class="btn btn-outline-primary w-50" id="loginEmailBtn">Login with Email</button>
+                <button class="btn btn-outline-primary w-50" id="loginMobileBtn">Login with Mobile</button>
+            </div>
+        </div>
+
+        <!-- Email/Mobile Input Section -->
+        <div id="input-section" class="d-none mt-4 text-start">
+            <div id="emailInputDiv" class="d-none">
+                <label for="issuerEmail" class="form-label fw-semibold">Email address</label>
+                <input type="email" id="issuerEmail" class="form-control mb-3" placeholder="Enter your email">
+            </div>
+            <div id="mobileInputDiv" class="d-none">
+                <label for="issuerMobile" class="form-label fw-semibold">Mobile number</label>
+                <input type="tel" id="issuerMobile" class="form-control mb-3" placeholder="Enter your mobile number">
+            </div>
+            <button class="btn btn-primary w-100 mb-3" id="sendOtpBtn">Send OTP</button>
+            <button class="btn btn-secondary w-100" id="cancel"
+                onclick="window.location.href='index.html'">Cancel</button>
+        </div>
+
+        <!-- OTP Section -->
+        <div id="otp-section" class="d-none mt-4 text-start">
+            <label for="readonlyValue" id="readonlyLabel" class="form-label fw-semibold"></label>
+            <input type="text" id="readonlyValue" class="form-control mb-3" readonly>
+            <div class="d-flex justify-content-center mb-3 flex-wrap" id="otpInputs"></div>
+            <p id="timerText" class="text-muted mb-2 text-center"></p>
+            <p id="resendText" class="resend-text disabled mb-3 text-center">Click to resend OTP</p>
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-secondary w-50 me-2" id="cancelBtn">Cancel</button>
+                <button class="btn btn-primary w-50" id="loginBtn">Login</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="issuer.js"></script>
+</body>
+
+</html>
