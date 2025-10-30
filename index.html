@@ -55,14 +55,25 @@
         <div id="otp-section" class="d-none mt-4 text-start">
             <label for="readonlyValue" id="readonlyLabel" class="form-label fw-semibold"></label>
             <input type="text" id="readonlyValue" class="form-control mb-3" readonly>
+
             <div class="d-flex justify-content-center mb-3 flex-wrap" id="otpInputs"></div>
-            <p id="timerText" class="text-muted mb-2 text-center"></p>
-            <p id="resendText" class="resend-text disabled mb-3 text-center">Click to resend OTP</p>
-            <div class="d-flex justify-content-between">
-                <button class="btn btn-secondary w-50 me-2" id="cancelBtn">Cancel</button>
-                <button class="btn btn-primary w-50" id="loginBtn">Login</button>
+
+            <!-- Timer + Resend Section -->
+            <div class="text-center mb-3">
+                <p class="small text-muted mb-1">
+                    Didn’t get the code?
+                    <span id="resendText" class="text-primary fw-semibold resend-text disabled">
+                        Click to resend OTP
+                    </span>
+                <p class="small text-secondary mb-1" id="timerText">Resend in <span id="timerValue">01:00</span></p>
+                </p>
             </div>
+
+            <!-- Buttons -->
+            <button class="btn btn-info w-100 text-white fw-semibold" id="loginBtn">Login</button>
+            <button class="btn btn-secondary w-100 mt-2" id="cancelBtn">Cancel</button>
         </div>
+
     </div>
 
 

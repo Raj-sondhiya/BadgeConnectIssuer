@@ -1,10 +1,12 @@
 // ====================================================================
-// SINGLE DOMContentLoaded HANDLER FOR ALL PAGES (STRUCTURE FIXED)
+// ✅ SINGLE DOMContentLoaded HANDLER (VERCEL SAFE VERSION)
 // ====================================================================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname;
 
-    initNavbarIfNeeded(path);
+    await initNavbarIfNeeded(path);
+    await loadFooter();
+
     initLoginPage(path);
     initAddEarnerPage(path);
     initEarnerListPage(path);
@@ -12,55 +14,58 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ====================================================================
-// NAVBAR LOGIC
+// ✅ NAVBAR LOGIC (ASYNC + PATH SAFE)
 // ====================================================================
-function initNavbarIfNeeded(path) {
+async function initNavbarIfNeeded(path) {
     const pages = ["issuerHome.html", "addEarner.html", "earnerList.html"];
-    if (!pages.some(page => path.endsWith(page))) return;
+    if (!pages.some(page => path.includes(page))) return;
 
-    fetch("issuerNavbar.html")
-        .then(res => res.text())
-        .then(html => {
-            const wrap = document.createElement("div");
-            wrap.innerHTML = html;
-            document.body.prepend(wrap);
+    try {
+        const res = await fetch("/issuerNavbar.html");
+        if (!res.ok) throw new Error("Navbar not found");
+        const html = await res.text();
 
-            const nameElement = document.getElementById("issuerName");
-            if (nameElement) nameElement.textContent = "Ramraj";
+        const wrap = document.createElement("div");
+        wrap.innerHTML = html;
+        document.body.prepend(wrap);
 
-            const logoutBtn = document.getElementById("logoutBtn");
-            if (logoutBtn) {
-                logoutBtn.addEventListener("click", () => {
-                    localStorage.removeItem("issuerLoggedIn");
-                    window.location.href = "index.html";
-                });
-            }
-        })
-        .catch(err => console.error("Navbar load failed:", err));
+        const nameElement = document.getElementById("issuerName");
+        if (nameElement) nameElement.textContent = localStorage.getItem("issuerName") || "Issuer";
+
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (logoutBtn) {
+            logoutBtn.addEventListener("click", () => {
+                localStorage.removeItem("issuerLoggedIn");
+                window.location.href = "/index.html";
+            });
+        }
+    } catch (err) {
+        console.error("Navbar load failed:", err);
+    }
 }
-
-// ===================================================================
-// ✅ Load Footer
-function loadFooter() {
-    const footerContainer = document.getElementById("footer-container");
-    if (!footerContainer) return; // Footer not needed on this page
-
-    fetch("footer.html")
-        .then(response => response.text())
-        .then(data => {
-            footerContainer.innerHTML = data;
-        })
-        .catch(error => console.error("Error loading footer:", error));
-}
-
-// Call when DOM ready
-document.addEventListener("DOMContentLoaded", loadFooter);
 
 // ====================================================================
-// LOGIN PAGE LOGIC
+// ✅ FOOTER LOADER (ASYNC + PATH SAFE)
+// ====================================================================
+async function loadFooter() {
+    const footerContainer = document.getElementById("footer-container");
+    if (!footerContainer) return;
+
+    try {
+        const res = await fetch("/footer.html");
+        if (!res.ok) throw new Error("Footer not found");
+        const html = await res.text();
+        footerContainer.innerHTML = html;
+    } catch (err) {
+        console.error("Error loading footer:", err);
+    }
+}
+
+// ====================================================================
+// ✅ LOGIN PAGE LOGIC
 // ====================================================================
 function initLoginPage(path) {
-    if (!path.endsWith("index.html")) return;
+    if (!path.includes("index.html") && !path.endsWith("/")) return;
 
     const loginEmailBtn = document.getElementById("loginEmailBtn");
     const loginMobileBtn = document.getElementById("loginMobileBtn");
@@ -68,7 +73,7 @@ function initLoginPage(path) {
     const resendText = document.getElementById("resendText");
     const cancelBtn = document.getElementById("cancelBtn");
     const loginBtn = document.getElementById("loginBtn");
-    if (!loginBtn) return; // Login UI absent
+    if (!loginBtn) return;
 
     let selectedMethod = null;
     let timerInterval;
@@ -84,35 +89,29 @@ function initLoginPage(path) {
     const readonlyValue = document.getElementById("readonlyValue");
     const readonlyLabel = document.getElementById("readonlyLabel");
 
-    function resetToMethodSelection() {
+    const resetToMethodSelection = () => {
         otpSection?.classList.add("d-none");
         inputSection?.classList.add("d-none");
         methodSelection?.classList.remove("d-none");
         subtitle.textContent = "Please select your login method";
         clearInterval(timerInterval);
+    };
+
+    loginEmailBtn?.addEventListener("click", () => toggleLogin("email"));
+    loginMobileBtn?.addEventListener("click", () => toggleLogin("mobile"));
+
+    function toggleLogin(method) {
+        selectedMethod = method;
+        methodSelection.classList.add("d-none");
+        inputSection.classList.remove("d-none");
+        emailInputDiv.classList.toggle("d-none", method !== "email");
+        mobileInputDiv.classList.toggle("d-none", method !== "mobile");
     }
 
-    loginEmailBtn?.addEventListener("click", () => {
-        selectedMethod = "email";
-        methodSelection.classList.add("d-none");
-        inputSection.classList.remove("d-none");
-        emailInputDiv.classList.remove("d-none");
-        mobileInputDiv.classList.add("d-none");
-    });
-
-    loginMobileBtn?.addEventListener("click", () => {
-        selectedMethod = "mobile";
-        methodSelection.classList.add("d-none");
-        inputSection.classList.remove("d-none");
-        mobileInputDiv.classList.remove("d-none");
-        emailInputDiv.classList.add("d-none");
-    });
-
     sendOtpBtn?.addEventListener("click", () => {
-        const value =
-            selectedMethod === "email"
-                ? document.getElementById("issuerEmail").value.trim()
-                : document.getElementById("issuerMobile").value.trim();
+        const value = selectedMethod === "email"
+            ? document.getElementById("issuerEmail").value.trim()
+            : document.getElementById("issuerMobile").value.trim();
 
         if (!value) {
             alert(`Enter your ${selectedMethod}`);
@@ -137,8 +136,7 @@ function initLoginPage(path) {
                 if (box.value && i < 5) inputs[i + 1].focus();
             });
             box.addEventListener("keydown", (e) => {
-                if (e.key === "Backspace" && !box.value && i > 0)
-                    inputs[i - 1].focus();
+                if (e.key === "Backspace" && !box.value && i > 0) inputs[i - 1].focus();
             });
         }
         inputs[0].focus();
@@ -167,7 +165,10 @@ function initLoginPage(path) {
     }
 
     resendText?.addEventListener("click", () => {
-        if (!resendText.classList.contains("disabled")) startOtpTimer();
+        if (!resendText.classList.contains("disabled")) {
+            startOtpTimer();
+            alert("OTP resent successfully");
+        }
     });
 
     cancelBtn?.addEventListener("click", resetToMethodSelection);
@@ -177,23 +178,22 @@ function initLoginPage(path) {
         if (entered !== "123456") return alert("Invalid OTP");
 
         localStorage.setItem("issuerLoggedIn", "1");
-        window.location.href = "issuerHome.html";
+        window.location.href = "/issuerHome.html";
     });
 }
 
 // ====================================================================
-// ADD EARNER PAGE LOGIC
+// ✅ ADD EARNER PAGE LOGIC
 // ====================================================================
 function initAddEarnerPage(path) {
-    if (!path.endsWith("addEarner.html")) return;
-
-    const form = document.getElementById("earnerForm");
-    if (!form) return;
+    if (!path.includes("addEarner.html")) return;
 
     const tabButtons = [...document.querySelectorAll("#earnerFormTabs .nav-link")];
     const prevBtn = document.getElementById("prevTabBtn");
     const nextBtn = document.getElementById("nextTabBtn");
     const submitBtn = document.getElementById("submitEarnerBtn");
+
+    if (!tabButtons.length) return;
 
     function goToTab(i) {
         if (!tabButtons[i]) return;
@@ -203,54 +203,15 @@ function initAddEarnerPage(path) {
         submitBtn.classList.toggle("d-none", i !== tabButtons.length - 1);
     }
 
-    nextBtn?.addEventListener("click", () => {
-        const cur = tabButtons.findIndex(t => t.classList.contains("active"));
-        goToTab(cur + 1);
-    });
-
-    prevBtn?.addEventListener("click", () => {
-        const cur = tabButtons.findIndex(t => t.classList.contains("active"));
-        goToTab(cur - 1);
-    });
-
-    tabButtons.forEach((btn, idx) =>
-        btn.addEventListener("shown.bs.tab", () => goToTab(idx))
-    );
-
-    // form.addEventListener("submit", (e) => {
-    //     e.preventDefault();
-
-    //     const newEarner = {
-    //         firstName: form.firstName.value.trim(),
-    //         lastName: form.lastName.value.trim(),
-    //         email: form.email.value.trim(),
-    //         contact: form.mobile.value.trim(),
-    //         badgeId: form.badgeId.value.trim(),
-    //         issueDate: form.issueDate.value.trim(),
-    //         organization: form.orgName.value.trim(),
-    //         location: form.orgLocation.value.trim(),
-    //         createdAt: new Date().toISOString()
-    //     };
-
-    //     // Minimal validation preserved
-    //     if (!newEarner.email || !newEarner.firstName || !newEarner.badgeId) {
-    //         alert("Email, First Name and Badge ID are mandatory.");
-    //         return;
-    //     }
-
-    //     const items = JSON.parse(localStorage.getItem("earners")) || [];
-    //     items.push(newEarner);
-    //     localStorage.setItem("earners", JSON.stringify(items));
-
-    //     window.location.href = "earnerList.html";
-    // });
+    nextBtn?.addEventListener("click", () => goToTab(tabButtons.findIndex(t => t.classList.contains("active")) + 1));
+    prevBtn?.addEventListener("click", () => goToTab(tabButtons.findIndex(t => t.classList.contains("active")) - 1));
 }
 
 // ====================================================================
-// EARNER LIST PAGE LOGIC
+// ✅ EARNER LIST PAGE LOGIC
 // ====================================================================
 function initEarnerListPage(path) {
-    if (!path.endsWith("earnerList.html")) return;
+    if (!path.includes("earnerList.html")) return;
 
     const tableBody = document.getElementById("earnerTableBody");
     if (!tableBody) return;
@@ -270,23 +231,18 @@ function initEarnerListPage(path) {
             <td>${e.organization}</td>
             <td>${e.location}</td>
             <td>${e.issueDate}</td>
-            <td class="text-center"> 
-                <i class="fa-solid fa-pen-to-square text-warning" onclick="editEarner(${i})"></i>
-                    <i class="fa-solid fa-trash text-danger" onclick="deleteEarner(${i})"></i>
-                    <i class="fa-solid fa-eye text-primary" onclick="viewEarner(${i})"></i>
+            <td class="text-center">
+                <i class="fa-solid fa-pen-to-square text-warning"></i>
+                <i class="fa-solid fa-trash text-danger"></i>
+                <i class="fa-solid fa-eye text-primary"></i>
             </td>
         `;
         tableBody.appendChild(tr);
     });
 }
 
-validateEarnerBtn.addEventListener("click", () => {
-    form.email.style.backgroundColor = "red";
-    form.email.style.color = "white";
-});
-
 // ====================================================================
-// MASS UPLOAD TOGGLE (SAFE CHECK)
+// ✅ MASS UPLOAD TOGGLE
 // ====================================================================
 function initMassUploadToggle() {
     const section = document.getElementById("massUploadSection");
