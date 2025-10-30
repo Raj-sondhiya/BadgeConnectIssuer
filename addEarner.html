@@ -45,15 +45,19 @@
                     </div>
 
                     <div class="upload-box" id="fileUploadBox">
-                        <!-- Hidden file input -->
                         <input type="file" id="csvFileInput" accept=".csv" />
-                        <!-- Button that acts as Select / Validate -->
-                        <!-- <button class="btn btn-outline-secondary" id="selectFileBtn">Select File</button> -->
                     </div>
-                    <button class="btn mass-upload-btn fw-semibold w-100 mt-2 d-none" id="validateCsvBtn">Validate
-                        Data</button>
-                    <button class="btn mass-upload-btn fw-semibold w-100 mt-2" id="selectFileBtn">Upload CSV
-                        file</button>
+                    <div>
+                        <button class="btn btn-info fw-semibold w-100 mt-2" id="selectFileBtn">Upload CSV
+                            file</button>
+
+                        <!-- Hidden action buttons -->
+                        <div class="d-flex gap-2 mt-2 d-none" id="uploadActions">
+                            <button class="btn btn-success flex-fill" id="validateCsvBtn">Validate Data</button>
+                            <button class="btn btn-secondary flex-fill" id="cancelCsvBtn">Cancel</button>
+                        </div>
+                    </div>
+
 
                     <!-- Preview table (hidden until validate clicked) -->
                     <div id="csvPreviewContainer" class="mt-3 d-none">
@@ -64,14 +68,6 @@
                                     <table class="table table-striped table-bordered" id="csvPreviewTable">
                                         <!-- Rendered by JS -->
                                     </table>
-                                </div>
-
-                                <!-- Upload button (centered at bottom) -->
-                                <div class="d-flex justify-content-center mt-3">
-                                    <button id="uploadValidatedBtn" class="btn btn-info text-white"
-                                        disabled>Upload</button>
-                                    <button class="btn btn-secondary mx-2"
-                                        onclick="window.location.href='addEarner.html'">Cancel</button>
                                 </div>
                             </div>
                         </div>
@@ -113,7 +109,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">First Name *</label>
-                                    <input type="text" id="firstName" class="form-control"
+                                    <input type="text" id="first Name" class="form-control"
                                         placeholder="Enter first name" required>
                                 </div>
                                 <div class="col-md-6">
@@ -185,10 +181,6 @@
                                 <div id="singlePreviewTableWrapper" style="overflow:auto;">
                                     <table class="table table-striped table-bordered" id="singlePreviewTable"></table>
                                 </div>
-                                <div class="d-flex justify-content-center mt-3">
-                                    <button id="submitSingleBtn" class="btn btn-info text-white"
-                                        disabled>Submit</button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -207,7 +199,7 @@
 
     <!-- Custom JS -->
     <script src="issuer.js"></script>
-    <script src="previewAndSubmit.js"></script>
+    <script src="addEarner.js"></script>
 
 </body>
 

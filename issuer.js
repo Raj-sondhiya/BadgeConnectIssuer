@@ -1,30 +1,31 @@
-// ====================================================================
-// ✅ SINGLE DOMContentLoaded HANDLER (VERCEL SAFE VERSION)
-// ====================================================================
+// issuer.js
+// Contains: navbar loader, footer loader, login page + OTP logic
+// Vercel-safe: uses root-relative fetch and robust path checks
+
 document.addEventListener("DOMContentLoaded", async () => {
-    const path = window.location.pathname;
+    const path = window.location.pathname || "/";
 
     await initNavbarIfNeeded(path);
     await loadFooter();
 
-    initLoginPage(path);
-    initAddEarnerPage(path);
-    initEarnerListPage(path);
-    initMassUploadToggle();
+    // Page-specific init
+    if (path.includes("index.html") || path === "/" || path.endsWith("/index")) initLoginPage();
+    // issuerHome.html remains as-is (no additional logic here)
+    // other pages have their own scripts
+    initMassUploadToggle(); // common toggle used by add-earner page too (no-op where not present)
 });
 
-// ====================================================================
-// ✅ NAVBAR LOGIC (ASYNC + PATH SAFE)
-// ====================================================================
+// =========================
+// NAVBAR (async, safe)
+// =========================
 async function initNavbarIfNeeded(path) {
-    const pages = ["issuerHome.html", "addEarner.html", "earnerList.html"];
-    if (!pages.some(page => path.includes(page))) return;
+    const pages = ["issuerHome.html", "addEarner.html", "earnerList.html", "add-earner.html"];
+    if (!pages.some(p => path.includes(p))) return;
 
     try {
-        const res = await fetch("/issuerNavbar.html");
-        if (!res.ok) throw new Error("Navbar not found");
+        const res = await fetch("issuerNavbar.html");
+        if (!res.ok) throw new Error("issuerNavbar not found");
         const html = await res.text();
-
         const wrap = document.createElement("div");
         wrap.innerHTML = html;
         document.body.prepend(wrap);
@@ -33,50 +34,44 @@ async function initNavbarIfNeeded(path) {
         if (nameElement) nameElement.textContent = localStorage.getItem("issuerName") || "Issuer";
 
         const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) {
-            logoutBtn.addEventListener("click", () => {
-                localStorage.removeItem("issuerLoggedIn");
-                window.location.href = "/index.html";
-            });
-        }
+        if (logoutBtn) logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem("issuerLoggedIn");
+            window.location.href = "index.html";
+        });
     } catch (err) {
         console.error("Navbar load failed:", err);
     }
 }
 
-// ====================================================================
-// ✅ FOOTER LOADER (ASYNC + PATH SAFE)
-// ====================================================================
+// =========================
+// FOOTER (async, safe)
+// =========================
 async function loadFooter() {
-    const footerContainer = document.getElementById("footer-container");
-    if (!footerContainer) return;
+    const container = document.getElementById("footer-container");
+    if (!container) return;
 
     try {
-        const res = await fetch("/footer.html");
-        if (!res.ok) throw new Error("Footer not found");
-        const html = await res.text();
-        footerContainer.innerHTML = html;
+        const res = await fetch("footer.html");
+        if (!res.ok) throw new Error("footer not found");
+        container.innerHTML = await res.text();
     } catch (err) {
-        console.error("Error loading footer:", err);
+        console.error("Footer load failed:", err);
     }
 }
 
-// ====================================================================
-// ✅ LOGIN PAGE LOGIC
-// ====================================================================
-function initLoginPage(path) {
-    if (!path.includes("index.html") && !path.endsWith("/")) return;
-
+// =========================
+// LOGIN + OTP logic
+// =========================
+function initLoginPage() {
     const loginEmailBtn = document.getElementById("loginEmailBtn");
     const loginMobileBtn = document.getElementById("loginMobileBtn");
     const sendOtpBtn = document.getElementById("sendOtpBtn");
-    const resendText = document.getElementById("resendText");
-    const cancelBtn = document.getElementById("cancelBtn");
     const loginBtn = document.getElementById("loginBtn");
-    if (!loginBtn) return;
+    const resendText = document.getElementById("resendText");
+    if (!loginBtn) return; // not login page
 
     let selectedMethod = null;
-    let timerInterval;
+    let timerInterval = null;
 
     const methodSelection = document.getElementById("method-selection");
     const inputSection = document.getElementById("input-section");
@@ -89,77 +84,68 @@ function initLoginPage(path) {
     const readonlyValue = document.getElementById("readonlyValue");
     const readonlyLabel = document.getElementById("readonlyLabel");
 
-    const resetToMethodSelection = () => {
-        otpSection?.classList.add("d-none");
-        inputSection?.classList.add("d-none");
-        methodSelection?.classList.remove("d-none");
-        subtitle.textContent = "Please select your login method";
-        clearInterval(timerInterval);
-    };
+    function toggleLogin(method) {
+        selectedMethod = method;
+        methodSelection?.classList.add("d-none");
+        inputSection?.classList.remove("d-none");
+        emailInputDiv?.classList.toggle("d-none", method !== "email");
+        mobileInputDiv?.classList.toggle("d-none", method !== "mobile");
+    }
 
     loginEmailBtn?.addEventListener("click", () => toggleLogin("email"));
     loginMobileBtn?.addEventListener("click", () => toggleLogin("mobile"));
 
-    function toggleLogin(method) {
-        selectedMethod = method;
-        methodSelection.classList.add("d-none");
-        inputSection.classList.remove("d-none");
-        emailInputDiv.classList.toggle("d-none", method !== "email");
-        mobileInputDiv.classList.toggle("d-none", method !== "mobile");
-    }
-
     sendOtpBtn?.addEventListener("click", () => {
-        const value = selectedMethod === "email"
-            ? document.getElementById("issuerEmail").value.trim()
-            : document.getElementById("issuerMobile").value.trim();
+        const value = selectedMethod === "email" ? (document.getElementById("issuerEmail")?.value || "").trim()
+            : (document.getElementById("issuerMobile")?.value || "").trim();
 
-        if (!value) {
-            alert(`Enter your ${selectedMethod}`);
-            return;
+        if (!value) return alert(`Enter your ${selectedMethod}`);
+
+        if (readonlyValue) readonlyValue.value = value;
+        if (readonlyLabel) readonlyLabel.textContent = selectedMethod === "email" ? "Email" : "Mobile";
+
+        // build OTP inputs
+        if (otpInputsDiv) {
+            otpInputsDiv.innerHTML = "";
+            const inputs = [];
+            for (let i = 0; i < 6; i++) {
+                const box = document.createElement("input");
+                box.type = "text";
+                box.maxLength = 1;
+                box.className = "otp-input";
+                otpInputsDiv.appendChild(box);
+                inputs.push(box);
+
+                box.addEventListener("input", () => {
+                    box.value = box.value.replace(/[^0-9]/g, "");
+                    if (box.value && i < 5) inputs[i + 1].focus();
+                });
+                box.addEventListener("keydown", (e) => {
+                    if (e.key === "Backspace" && !box.value && i > 0) inputs[i - 1].focus();
+                });
+            }
+            inputs[0]?.focus();
         }
 
-        readonlyValue.value = value;
-        readonlyLabel.textContent = selectedMethod === "email" ? "Email" : "Mobile";
-
-        otpInputsDiv.innerHTML = "";
-        const inputs = [];
-        for (let i = 0; i < 6; i++) {
-            const box = document.createElement("input");
-            box.type = "text";
-            box.maxLength = 1;
-            box.classList.add("otp-input");
-            otpInputsDiv.appendChild(box);
-            inputs.push(box);
-
-            box.addEventListener("input", () => {
-                box.value = box.value.replace(/[^0-9]/g, "");
-                if (box.value && i < 5) inputs[i + 1].focus();
-            });
-            box.addEventListener("keydown", (e) => {
-                if (e.key === "Backspace" && !box.value && i > 0) inputs[i - 1].focus();
-            });
-        }
-        inputs[0].focus();
-
-        inputSection.classList.add("d-none");
-        otpSection.classList.remove("d-none");
-        subtitle.textContent = "Please verify your login details";
+        inputSection?.classList.add("d-none");
+        otpSection?.classList.remove("d-none");
+        if (subtitle) subtitle.textContent = "Please verify your login details";
         startOtpTimer();
     });
 
     function startOtpTimer() {
         let t = 60;
-        resendText.classList.add("disabled");
-        timerText.textContent = `Resend in 00:${t}`;
         clearInterval(timerInterval);
+        resendText?.classList.add("disabled");
+        if (timerText) timerText.textContent = `Resend in 00:${t < 10 ? "0" + t : t}`;
 
         timerInterval = setInterval(() => {
             t--;
-            timerText.textContent = `Resend in 00:${t < 10 ? "0" + t : t}`;
+            if (timerText) timerText.textContent = `Resend in 00:${t < 10 ? "0" + t : t}`;
             if (t <= 0) {
                 clearInterval(timerInterval);
-                timerText.textContent = "";
-                resendText.classList.remove("disabled");
+                if (timerText) timerText.textContent = "";
+                resendText?.classList.remove("disabled");
             }
         }, 1000);
     }
@@ -171,79 +157,27 @@ function initLoginPage(path) {
         }
     });
 
-    cancelBtn?.addEventListener("click", resetToMethodSelection);
+    document.getElementById("cancelBtn")?.addEventListener("click", () => {
+        clearInterval(timerInterval);
+        otpSection?.classList.add("d-none");
+        inputSection?.classList.add("d-none");
+        methodSelection?.classList.remove("d-none");
+        if (subtitle) subtitle.textContent = "Please select your login method";
+    });
 
     loginBtn.addEventListener("click", () => {
-        const entered = [...otpInputsDiv.querySelectorAll("input")].map(i => i.value).join("");
+        const entered = [...(document.querySelectorAll("#otpInputs input") || [])]
+            .map(i => i.value).join("");
         if (entered !== "123456") return alert("Invalid OTP");
-
         localStorage.setItem("issuerLoggedIn", "1");
-        window.location.href = "/issuerHome.html";
+        // keep issuerHome path relative to root
+        window.location.href = "issuerHome.html";
     });
 }
 
-// ====================================================================
-// ✅ ADD EARNER PAGE LOGIC
-// ====================================================================
-function initAddEarnerPage(path) {
-    if (!path.includes("addEarner.html")) return;
-
-    const tabButtons = [...document.querySelectorAll("#earnerFormTabs .nav-link")];
-    const prevBtn = document.getElementById("prevTabBtn");
-    const nextBtn = document.getElementById("nextTabBtn");
-    const submitBtn = document.getElementById("submitEarnerBtn");
-
-    if (!tabButtons.length) return;
-
-    function goToTab(i) {
-        if (!tabButtons[i]) return;
-        tabButtons[i].click();
-        prevBtn.classList.toggle("d-none", i === 0);
-        nextBtn.classList.toggle("d-none", i === tabButtons.length - 1);
-        submitBtn.classList.toggle("d-none", i !== tabButtons.length - 1);
-    }
-
-    nextBtn?.addEventListener("click", () => goToTab(tabButtons.findIndex(t => t.classList.contains("active")) + 1));
-    prevBtn?.addEventListener("click", () => goToTab(tabButtons.findIndex(t => t.classList.contains("active")) - 1));
-}
-
-// ====================================================================
-// ✅ EARNER LIST PAGE LOGIC
-// ====================================================================
-function initEarnerListPage(path) {
-    if (!path.includes("earnerList.html")) return;
-
-    const tableBody = document.getElementById("earnerTableBody");
-    if (!tableBody) return;
-
-    const data = JSON.parse(localStorage.getItem("earners")) || [];
-    tableBody.innerHTML = "";
-
-    data.forEach((e, i) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td>${i + 1}</td>
-            <td>${e.email}</td>
-            <td>${e.contact}</td>
-            <td>${e.firstName}</td>
-            <td>${e.lastName}</td>
-            <td>${e.badgeId}</td>
-            <td>${e.organization}</td>
-            <td>${e.location}</td>
-            <td>${e.issueDate}</td>
-            <td class="text-center">
-                <i class="fa-solid fa-pen-to-square text-warning"></i>
-                <i class="fa-solid fa-trash text-danger"></i>
-                <i class="fa-solid fa-eye text-primary"></i>
-            </td>
-        `;
-        tableBody.appendChild(tr);
-    });
-}
-
-// ====================================================================
-// ✅ MASS UPLOAD TOGGLE
-// ====================================================================
+// =========================
+// MASS UPLOAD TOGGLE (shared small helper)
+// =========================
 function initMassUploadToggle() {
     const section = document.getElementById("massUploadSection");
     const form = document.getElementById("singleEarnerForm");
