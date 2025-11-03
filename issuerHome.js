@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const searchBtn = document.getElementById("searchBtn");
     const paginationContainer = document.getElementById("paginationContainer");
 
-    const BADGES_PER_PAGE = 20;
+    const BADGES_PER_PAGE = 24;
     let allBadges = [];
     let currentPage = 1;
 
@@ -72,8 +72,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         <operation>QB</operation>
         <sessionID>${sessionID}</sessionID>
         <period>
-          <startCreateDateRange>06/23/2023</startCreateDateRange>
-          <endCreateDateRange>07/10/2025</endCreateDateRange>
+          <startCreateDateRange>01/01/2018</startCreateDateRange>
+          <endCreateDateRange>03/11/2027</endCreateDateRange>
         </period>
       </xmlrequest>
     `;

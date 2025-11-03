@@ -1,5 +1,6 @@
 body {
-    background: linear-gradient(to right, #f8d7da, #d1ecf1);
+    /* background: linear-gradient(to right, #ece3e3, #e3eef0); */
+    background-color: #ebebeb;
     min-height: 100vh;
 }
 
