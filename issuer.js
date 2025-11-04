@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (path.includes("index.html") || path === "/" || path.endsWith("/index")) initLoginPage();
     // issuerHome.html remains as-is (no additional logic here)
     // other pages have their own scripts
-    initMassUploadToggle(); // common toggle used by add-earner page too (no-op where not present)
+    // common toggle used by add-earner page too (no-op where not present)
 });
 
 // =========================
@@ -194,7 +194,7 @@ function initLoginPage() {
                     icon: "success",
                     title: "Login Successful!",
                     text: "Redirecting to your dashboard...",
-                    timer: 2000,
+                    timer: 1000,
                     showConfirmButton: false
                 });
                 setTimeout(() => {
@@ -215,21 +215,4 @@ function initLoginPage() {
 }
 
 
-// =========================
-// MASS UPLOAD TOGGLE (shared small helper)
-// =========================
-function initMassUploadToggle() {
-    const section = document.getElementById("massUploadSection");
-    const form = document.getElementById("singleEarnerForm");
-    if (!section || !form) return;
 
-    document.getElementById("addSingleEarnerBtn")?.addEventListener("click", () => {
-        section.classList.add("d-none");
-        form.classList.remove("d-none");
-    });
-
-    document.getElementById("backToUploadBtn")?.addEventListener("click", () => {
-        form.classList.add("d-none");
-        section.classList.remove("d-none");
-    });
-}

@@ -175,6 +175,7 @@ window.viewEarner = function (idx) {
           ${badges.length > 0
       ? `<ul class="mb-0">${badges.map((b, i) => `<li><strong>Badge ${i + 1}:</strong> ${escapeHtml(b)}</li>`).join("")}</ul>`
       : "—"}
+                  <i class="fa-solid fa-repeat text-primary ms-2" style="cursor:pointer" )"></i>
         </td>
       </tr>
       <tr>

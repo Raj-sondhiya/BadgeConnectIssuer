@@ -45,23 +45,24 @@
                         <i class="fa-solid fa-circle-question question-icon" data-bs-toggle="popover"
                             data-bs-content="Required fields: FirstName, LastName, EmailAddress, BadgeId, IssueDate. Other fields are optional."></i>
                         <a href="EarnerTemplate.csv" target="_blank">
-                            <i title="Open CSV Format">Download CSV</i>
+                            <i title="Open CSV Format">Download template</i>
                         </a>
                     </div>
 
                     <div class="upload-box" id="fileUploadBox">
                         <input type="file" id="csvFileInput" accept=".csv" />
                     </div>
-                    <div>
-                        <button class="btn btn-primary   w-100 mt-2" id="selectFileBtn">Upload CSV
-                            file</button>
-
-                        <!-- Hidden action buttons -->
-                        <div class="d-flex gap-2 mt-2 d-none" id="uploadActions">
-                            <button class="btn btn-secondary" id="cancelCsvBtn">Cancel</button>
-                            <button class="btn btn-primary" id="validateCsvBtn">Validate Data</button>
-                        </div>
+                    <!-- Wrapper for Select Button (centered) -->
+                    <div class="d-flex justify-content-center">
+                        <button class="btn btn-primary mt-2" id="selectFileBtn">Select CSV file</button>
                     </div>
+
+                    <!-- Hidden action buttons (right aligned) -->
+                    <div class="d-flex justify-content-end gap-2 mt-2 d-none" id="uploadActions">
+                        <button class="btn btn-secondary" id="cancelCsvBtn">Cancel</button>
+                        <button class="btn btn-primary" id="validateCsvBtn">Validate Data</button>
+                    </div>
+
 
 
                     <!-- Preview table (hidden until validate clicked) -->
@@ -87,113 +88,121 @@
             </div>
 
             <!-- Issuer to a single earner form -->
+            <!-- Issuer to a single earner form (Accordion version) -->
             <div id="singleEarnerForm" class="card shadow-sm border-0 mt-4 mx-auto d-none">
                 <div class="card-body">
                     <button type="button" id="backToUploadBtn" class="btn btn-secondary mb-3">
                         ← Back to Mass Upload
                     </button>
-                    <!-- Bootstrap Nav Tabs (keep second snippet tabs & order) -->
-                    <ul class="nav nav-tabs mb-3" id="earnerFormTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="tab-earner" data-bs-toggle="tab"
-                                data-bs-target="#earnerTab" type="button" role="tab">Earner</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-badge" data-bs-toggle="tab" data-bs-target="#badgeTab"
-                                type="button" role="tab">Badge</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-org" data-bs-toggle="tab" data-bs-target="#orgTab"
-                                type="button" role="tab">Organization</button>
-                        </li>
-                    </ul>
 
-                    <form id="earnerForm" class="tab-content">
-                        <!-- Earner Tab -->
-                        <div class="tab-pane fade show active" id="earnerTab" role="tabpanel">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label  ">First Name *</label>
-                                    <input type="text" id="firstName" class="form-control"
-                                        placeholder="Enter first name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Last Name *</label>
-                                    <input type="text" id="lastName" class="form-control" placeholder="Enter last name"
-                                        required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Email *</label>
-                                    <input type="email" id="email" class="form-control" placeholder="Enter email"
-                                        required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Mobile</label>
-                                    <input type="text" id="mobile" class="form-control"
-                                        placeholder="Enter mobile number">
+                    <!-- Accordion replacing tabs -->
+                    <div class="accordion" id="earnerAccordion">
+
+                        <!-- Earner Section -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingEarner">
+                                <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#earnerTab" aria-expanded="true" aria-controls="earnerTab">
+                                    Earner
+                                </button>
+                            </h2>
+                            <div id="earnerTab" class="accordion-collapse collapse show" aria-labelledby="headingEarner"
+                                data-bs-parent="#earnerAccordion">
+                                <div class="accordion-body">
+                                    <form id="earnerForm" class="tab-content">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label  ">First Name *</label>
+                                                <input type="text" id="firstName" class="form-control"
+                                                    placeholder="Enter first name" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label  ">Last Name *</label>
+                                                <input type="text" id="lastName" class="form-control"
+                                                    placeholder="Enter last name" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label  ">Email *</label>
+                                                <input type="email" id="email" class="form-control"
+                                                    placeholder="Enter email" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label  ">Mobile</label>
+                                                <input type="text" id="mobile" class="form-control"
+                                                    placeholder="Enter mobile number">
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Badge Tab -->
-                        <div class="tab-pane fade" id="badgeTab" role="tabpanel">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Badge ID *</label>
-                                    <input type="text" id="badgeId" class="form-control" placeholder="Enter badge id"
-                                        required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Issue Date *</label>
-                                    <input type="text" id="issueDate" class="form-control"
-                                        placeholder="Enter badge issue date">
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Organization Tab -->
-                        <div class="tab-pane fade" id="orgTab" role="tabpanel">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Company Name</label>
-                                    <input type="text" id="orgName" class="form-control"
-                                        placeholder="Enter company name">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label  ">Location *</label>
-                                    <input type="text" id="orgLocation" class="form-control"
-                                        placeholder="Enter location" required>
+                        <!-- Badge Section -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingBadge">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#badgeTab" aria-expanded="false" aria-controls="badgeTab">
+                                    Badge
+                                </button>
+                            </h2>
+                            <div id="badgeTab" class="accordion-collapse collapse" aria-labelledby="headingBadge"
+                                data-bs-parent="#earnerAccordion">
+                                <div class="accordion-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label  ">Badge ID *</label>
+                                            <input type="text" id="badgeId" class="form-control"
+                                                placeholder="Enter badge id" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label  ">Issue Date *</label>
+                                            <input type="text" id="issueDate" class="form-control"
+                                                placeholder="Enter badge issue date">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Navigation Buttons -->
-                        <div class="d-flex mt-4">
-                            <button type="button" id="prevTabBtn"
-                                class="btn btn-secondary d-none ms-2">Previous</button>
-                            <button type="button" id="nextTabBtn" class="btn btn-primary text-white ms-2">Next</button>
-                            <button type="button" id="validateEarnerBtn" class="btn btn-primary d-none ms-2">
-                                Issue
-                            </button>
-
-                        </div>
-                    </form>
-
-                    <!-- Single-earner preview (hidden until validate clicked) -->
-                    <div id="singlePreviewContainer" class="mt-3 d-none">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body p-3">
-                                <div id="singlePreviewErrors" class="mb-2"></div>
-                                <div id="singlePreviewTableWrapper" style="overflow:auto;">
-                                    <table class="table table-striped table-bordered" id="singlePreviewTable"></table>
+                        <!-- Organization Section -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOrg">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#orgTab" aria-expanded="false" aria-controls="orgTab">
+                                    Organization
+                                </button>
+                            </h2>
+                            <div id="orgTab" class="accordion-collapse collapse" aria-labelledby="headingOrg"
+                                data-bs-parent="#earnerAccordion">
+                                <div class="accordion-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label  ">Company Name</label>
+                                            <input type="text" id="orgName" class="form-control"
+                                                placeholder="Enter company name">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label  ">Location *</label>
+                                            <input type="text" id="orgLocation" class="form-control"
+                                                placeholder="Enter location" required>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Navigation Buttons (keep original IDs) -->
+                    <div class="d-flex justify-content-end mt-4 gap-2">
+                        <button type="button" id="prevTabBtn" class="btn btn-secondary d-none ms-2">Previous</button>
+                        <button type="button" id="nextTabBtn" class="btn btn-primary text-white ms-2">Next</button>
+                        <button type="button" id="validateEarnerBtn" class="btn btn-primary d-none ms-2">
+                            Issue
+                        </button>
+                    </div>
                 </div>
             </div>
+        </div>
         </div>
     </main>
 

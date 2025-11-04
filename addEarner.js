@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initMassUpload();
     initSingleEarnerForm();
     initPopovers();
+    initMassUploadToggle();
 });
 
 // Popup for question mark icons
@@ -122,7 +123,7 @@ function initMassUpload() {
             localStorage.setItem("earners", JSON.stringify([...existing, ...parsedRows]));
             Swal.fire({
                 icon: "success",
-                title: "Upload Successful",
+                title: "Badge Issued Successfully",
                 text: `${parsedRows.length} earners saved successfully.`,
                 timer: 2000,
                 showConfirmButton: false
@@ -140,69 +141,117 @@ function initMassUpload() {
     cancelBtn.addEventListener("click", () => location.reload());
 }
 
-/* -------------------- SINGLE EARNER FORM -------------------- */
-/* -------------------- SINGLE EARNER FORM -------------------- */
+/* -------------------- SINGLE EARNER FORM (Accordion Version) -------------------- */
 function initSingleEarnerForm() {
-    const tabs = [...document.querySelectorAll("#earnerFormTabs .nav-link")];
+    const panels = ["earnerTab", "badgeTab", "orgTab"];
     const nextBtn = document.getElementById("nextTabBtn");
     const prevBtn = document.getElementById("prevTabBtn");
-    const issueBtn = document.getElementById("validateEarnerBtn"); // renamed in UI to "Issue"
-    const form = document.getElementById("earnerForm");
+    const issueBtn = document.getElementById("validateEarnerBtn");
+    const accordion = document.getElementById("earnerAccordion");
 
-    if (!form) return;
+    if (!accordion) return;
+    let currentIndex = 0;
 
-    function showTab(index) {
-        tabs[index].click();
+    // Show accordion section by index
+    function showSection(index) {
+        panels.forEach((id, i) => {
+            const section = document.getElementById(id);
+            const headerButton = document.querySelector(`[data-bs-target="#${id}"]`);
+            if (!section || !headerButton) return;
+            const instance = bootstrap.Collapse.getOrCreateInstance(section, { toggle: false });
+
+            if (i === index) {
+                instance.show();
+                headerButton.classList.remove("collapsed");
+            } else {
+                instance.hide();
+                headerButton.classList.add("collapsed");
+            }
+        });
+
         prevBtn.classList.toggle("d-none", index === 0);
-        nextBtn.classList.toggle("d-none", index === tabs.length - 1);
-        issueBtn.classList.toggle("d-none", index !== tabs.length - 1);
+        nextBtn.classList.toggle("d-none", index === panels.length - 1);
+        issueBtn.classList.toggle("d-none", index !== panels.length - 1);
     }
 
+    // Move between accordion sections
     nextBtn.addEventListener("click", () => {
-        const idx = tabs.findIndex((t) => t.classList.contains("active"));
-        if (idx < tabs.length - 1) showTab(idx + 1);
+        if (currentIndex < panels.length - 1) {
+            currentIndex++;
+            showSection(currentIndex);
+        }
     });
 
     prevBtn.addEventListener("click", () => {
-        const idx = tabs.findIndex((t) => t.classList.contains("active"));
-        if (idx > 0) showTab(idx - 1);
+        if (currentIndex > 0) {
+            currentIndex--;
+            showSection(currentIndex);
+        }
     });
 
-    tabs.forEach((t, i) => t.addEventListener("shown.bs.tab", () => showTab(i)));
+    // Sync buttons when user clicks accordion headers
+    document.addEventListener("shown.bs.collapse", (e) => {
+        const idx = panels.indexOf(e.target.id);
+        if (idx >= 0) {
+            currentIndex = idx;
+            showSection(currentIndex);
+        }
+    });
 
-    // ✅ Directly save to localStorage on Issue
+    // Issue button: validate and save
     issueBtn.addEventListener("click", () => {
-        const inputs = form.querySelectorAll("input, select, textarea");
-        const row = {};
-        inputs.forEach((i) => (row[i.id] = i.value.trim()));
+        const requiredFields = [
+            "firstName",
+            "lastName",
+            "email",
+            "badgeId",
+            "issueDate",
+            "orgLocation",
+        ];
 
-        // Validation check
-        if (!row.firstName || !row.lastName || !row.email || !row.badgeId || !row.issueDate || !row.orgLocation) {
+        let missing = [];
+        const data = {};
+
+        requiredFields.forEach((id) => {
+            const el = document.getElementById(id);
+            const value = el ? el.value.trim() : "";
+            data[id] = value;
+            if (!value) missing.push(id);
+        });
+
+        // Optional fields
+        ["mobile", "orgName"].forEach((id) => {
+            const el = document.getElementById(id);
+            data[id] = el ? el.value.trim() : "";
+        });
+
+        if (missing.length > 0) {
             Swal.fire({
                 icon: "warning",
                 title: "Missing Fields",
-                text: "Please fill in all required fields before issuing the badge."
+                text: "Please fill all required fields before issuing the badge.",
             });
             return;
         }
 
-        // Save directly to localStorage
-        const existing = JSON.parse(localStorage.getItem("earners") || "[]");
-        existing.push(row);
-        localStorage.setItem("earners", JSON.stringify(existing));
+        // Save to localStorage
+        const earners = JSON.parse(localStorage.getItem("earners") || "[]");
+        earners.push(data);
+        localStorage.setItem("earners", JSON.stringify(earners));
 
-        // Success popup
         Swal.fire({
             icon: "success",
-            title: "Badge Issued",
-            text: "Earner details have been saved successfully.",
+            text: "Badge issued successfully.",
             timer: 2000,
-            showConfirmButton: false
+            showConfirmButton: false,
         }).then(() => {
             window.location.href = "earnerList.html";
         });
     });
+
+    showSection(currentIndex);
 }
+
 
 
 // ✅ Initialize Flatpickr for date fields
@@ -210,6 +259,28 @@ flatpickr("#issueDate", {
     dateFormat: "d-m-Y",
     allowInput: true
 });
+
+// =========================
+// MASS UPLOAD TOGGLE (shared small helper)
+// =========================
+function initMassUploadToggle() {
+    const section = document.getElementById("massUploadSection");
+    const form = document.getElementById("singleEarnerForm");
+    if (!section || !form) return;
+
+    document.getElementById("addSingleEarnerBtn")?.addEventListener("click", () => {
+        section.classList.add("d-none");
+        form.classList.remove("d-none");
+    });
+
+    document.getElementById("backToUploadBtn")?.addEventListener("click", () => {
+        form.classList.add("d-none");
+        section.classList.remove("d-none");
+    });
+}
+
+
+
 /* -------------------- UTILITIES -------------------- */
 function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
