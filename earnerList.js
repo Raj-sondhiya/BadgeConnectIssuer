@@ -1,41 +1,49 @@
 // earnerList.js
 // Contains: read earners from localStorage and render in earnerList.html
-// Also exposes editEarner, deleteEarner, viewEarner so existing inline onclick handlers keep working.
+// Uses SweetAlert2 for alerts and confirmations.
 
 document.addEventListener("DOMContentLoaded", () => {
-    const path = window.location.pathname || "/";
-    if (!path.includes("earnerList.html") && !path.includes("earner-list")) return;
-    renderEarnerList();
+  const path = window.location.pathname || "/";
+  if (!path.includes("earnerList.html") && !path.includes("earner-list")) return;
+  renderEarnerList();
 });
 
 // =========================
 // Render list into #earnerTableBody
 // =========================
 function renderEarnerList() {
-    const tableBody = document.getElementById("earnerTableBody");
-    if (!tableBody) return;
+  const tableBody = document.getElementById("earnerTableBody");
+  if (!tableBody) return;
 
-    const data = JSON.parse(localStorage.getItem("earners") || "[]");
-    tableBody.innerHTML = "";
+  const data = JSON.parse(localStorage.getItem("earners") || "[]");
+  tableBody.innerHTML = "";
 
-    data.forEach((e, i) => {
-        // ✅ Support both new and old formats
-        const firstName = e.firstName || e["First name"] || "";
-        const lastName = e.lastName || e["Last name"] || "";
-        const fullName = `${firstName} ${lastName}`.trim();
+  if (data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="8" class="text-center text-muted py-4">
+          No earners found. Add a new one to get started.
+        </td>
+      </tr>`;
+    return;
+  }
 
-        const address = e.orgLocation || e["location-b1"] || e["Location"] || "";
-        const company = e.orgName || e["Company"] || e["organization"] || "";
-        const email = e.email || e["email"] || "";
-        const contact = e.mobile || e["Mobile Number"] || e["contact"] || "";
-        const badgeId = e.badgeId || e["badge1"] || "";
-        const issueDate = e.issueDate || e["issuedate-b1"] || "";
+  data.forEach((e, i) => {
+    const firstName = e.firstName || e["First name"] || "";
+    const lastName = e.lastName || e["Last name"] || "";
+    const fullName = `${firstName} ${lastName}`.trim();
 
-        // 🔹 If no badges in data, show a random fallback number (temporary)
-        const badges = badgeId ? 1 : Math.floor(Math.random() * 5 + 1);
+    const address = e.orgLocation || e["location-b1"] || e["Location"] || "";
+    const company = e.orgName || e["Company"] || e["organization"] || "";
+    const email = e.email || e["email"] || "";
+    const contact = e.mobile || e["Mobile Number"] || e["contact"] || "";
+    const badgeId = e.badgeId || e["badge1"] || "";
+    const issueDate = e.issueDate || e["issuedate-b1"] || "";
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
+    const badges = badgeId ? 1 : Math.floor(Math.random() * 5 + 1);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
         <td>${i + 1}</td>
         <td>${escapeHtml(email)}</td>
         <td>${escapeHtml(fullName)}</td>
@@ -49,62 +57,98 @@ function renderEarnerList() {
             <i class="fa-solid fa-eye text-primary ms-2" style="cursor:pointer" onclick="viewEarner(${i})"></i>
         </td>
     `;
-        tableBody.appendChild(tr);
-    });
+    tableBody.appendChild(tr);
+  });
 }
-
 
 // =========================
 // Actions: edit, delete, view
-// These are global so HTML inline handlers can call them
 // =========================
-window.editEarner = function (idx) {
-    const data = JSON.parse(localStorage.getItem("earners") || "[]");
-    if (!data[idx]) return alert("Record not found");
-    localStorage.setItem("earnerEditDraft", JSON.stringify({ index: idx, record: data[idx] }));
-    window.location.href = "editEarner.html"; // redirect to edit page
+window.editEarner = async function (idx) {
+  const data = JSON.parse(localStorage.getItem("earners") || "[]");
+  if (!data[idx]) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Record not found."
+    });
+    return;
+  }
+  localStorage.setItem("earnerEditDraft", JSON.stringify({ index: idx, record: data[idx] }));
+  window.location.href = "editEarner.html";
 };
 
+// Delete with confirmation
+window.deleteEarner = async function (idx) {
+  const data = JSON.parse(localStorage.getItem("earners") || "[]");
+  if (!data[idx]) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Record not found."
+    });
+    return;
+  }
 
-window.deleteEarner = function (idx) {
-    if (!confirm("Delete this earner? This action cannot be undone.")) return;
-    const data = JSON.parse(localStorage.getItem("earners") || "[]");
-    if (!data[idx]) return alert("Record not found");
-    data.splice(idx, 1);
-    localStorage.setItem("earners", JSON.stringify(data));
-    renderEarnerList();
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "Delete this earner?",
+    text: "This action cannot be undone.",
+    showCancelButton: true,
+    confirmButtonText: "Yes, Delete",
+    cancelButtonText: "Cancel",
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#6c757d"
+  });
+
+  if (!result.isConfirmed) return;
+
+  data.splice(idx, 1);
+  localStorage.setItem("earners", JSON.stringify(data));
+  renderEarnerList();
+
+  Swal.fire({
+    icon: "success",
+    title: "Deleted",
+    text: "Earner record has been deleted successfully.",
+    timer: 1500,
+    showConfirmButton: false
+  });
 };
 
-// Add other columns about issuer details here if required
+// View modal
 window.viewEarner = function (idx) {
-    const data = JSON.parse(localStorage.getItem("earners") || "[]");
-    if (!data[idx]) return alert("Record not found");
-    const e = data[idx];
+  const data = JSON.parse(localStorage.getItem("earners") || "[]");
+  if (!data[idx]) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Record not found."
+    });
+    return;
+  }
 
-    // ✅ Flexible field mapping (old CSV + new JSON)
-    const firstName = e.firstName || e["First name"] || "";
-    const lastName = e.lastName || e["Last name"] || "";
-    const fullName = `${firstName} ${lastName}`.trim();
-    const email = e.email || e["email"] || "";
-    const contact = e.mobile || e["Mobile Number"] || "";
-    const company = e.orgName || e["Company"] || e["organization"] || "";
-    const address = e.orgLocation || e["location-b1"] || e["Location"] || "";
-    const issuer = e.issuerName || e["issuerName-b1"] || "";
-    const issueDate = e.issueDate || e["issuedate-b1"] || "";
-    const expiryDate = e.expDate || e["expDate-b1"] || "";
-    const referenceLink = e.issuerRefernceLink || e["issuerRefernceLink"] || "";
-    const notes = e.issuerNotes || e["issuerNotes-b1"] || "";
+  const e = data[idx];
+  const firstName = e.firstName || e["First name"] || "";
+  const lastName = e.lastName || e["Last name"] || "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  const email = e.email || e["email"] || "";
+  const contact = e.mobile || e["Mobile Number"] || "";
+  const company = e.orgName || e["Company"] || e["organization"] || "";
+  const address = e.orgLocation || e["location-b1"] || e["Location"] || "";
+  const issuer = e.issuerName || e["issuerName-b1"] || "";
+  const issueDate = e.issueDate || e["issuedate-b1"] || "";
+  const expiryDate = e.expDate || e["expDate-b1"] || "";
+  const notes = e.issuerNotes || e["issuerNotes-b1"] || "";
 
-    // ✅ Collect all badges dynamically
-    const badges = Object.keys(e)
-        .filter(k => k.toLowerCase().startsWith("badge") && e[k])
-        .map(k => e[k]);
+  const badges = Object.keys(e)
+    .filter(k => k.toLowerCase().startsWith("badge") && e[k])
+    .map(k => e[k]);
 
-    // ✅ Build modal body
-    const body = document.getElementById("earnerDetailsBody");
-    if (!body) return;
+  const body = document.getElementById("earnerDetailsBody");
+  if (!body) return;
 
-    body.innerHTML = `
+  body.innerHTML = `
       <tr>
         <td class="bg-info text-white fw-semibold" style="width: 30%;">Full Name</td>
         <td>${escapeHtml(fullName)}</td>
@@ -129,11 +173,8 @@ window.viewEarner = function (idx) {
         <td class="bg-info text-white fw-semibold">Badges</td>
         <td>
           ${badges.length > 0
-            ? `<ul class="mb-0">${badges
-                .map((b, i) => `<li><strong>Badge ${i + 1}:</strong> ${escapeHtml(b)}</li>`)
-                .join("")}</ul>`
-            : "—"
-        }
+      ? `<ul class="mb-0">${badges.map((b, i) => `<li><strong>Badge ${i + 1}:</strong> ${escapeHtml(b)}</li>`).join("")}</ul>`
+      : "—"}
         </td>
       </tr>
       <tr>
@@ -152,21 +193,15 @@ window.viewEarner = function (idx) {
         <td class="bg-info text-white fw-semibold">Issuer Notes</td>
         <td>${escapeHtml(notes)}</td>
       </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Reference Link</td>
-        <td>${referenceLink ? `<a href="${referenceLink}" target="_blank">${escapeHtml(referenceLink)}</a>` : "—"}</td>
-      </tr>
     `;
 
-    // ✅ Open modal
-    const modal = new bootstrap.Modal(document.getElementById("earnerViewModal"));
-    modal.show();
+  const modal = new bootstrap.Modal(document.getElementById("earnerViewModal"));
+  modal.show();
 };
-
 
 // =========================
 // Small HTML escape utility
 // =========================
 function escapeHtml(s) {
-    return s.replace?.(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") ?? s;
+  return s.replace?.(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") ?? s;
 }

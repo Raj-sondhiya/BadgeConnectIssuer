@@ -60,120 +60,160 @@ async function loadFooter() {
 }
 
 // =========================
-// LOGIN + OTP logic
+// LOGIN + OTP logic (with SweetAlert2)
 // =========================
 function initLoginPage() {
-    const loginEmailBtn = document.getElementById("loginEmailBtn");
-    const loginMobileBtn = document.getElementById("loginMobileBtn");
-    const sendOtpBtn = document.getElementById("sendOtpBtn");
-    const loginBtn = document.getElementById("loginBtn");
-    const resendText = document.getElementById("resendText");
-    if (!loginBtn) return; // not login page
+    const loginForm = document.getElementById("loginForm");
+    const otpForm = document.getElementById("otpForm");
+    const emailField = document.getElementById("email");
+    const verifyEmail = document.getElementById("verifyEmail");
+    const formSubtitle = document.getElementById("form-subtitle");
+    const resendLink = document.getElementById("resendLink");
+    const timerText = document.getElementById("timer");
+    const otpInputs = document.querySelectorAll(".otp-input");
 
-    let selectedMethod = null;
-    let timerInterval = null;
+    let timer;
+    let countdown = 60;
 
-    const methodSelection = document.getElementById("method-selection");
-    const inputSection = document.getElementById("input-section");
-    const emailInputDiv = document.getElementById("emailInputDiv");
-    const mobileInputDiv = document.getElementById("mobileInputDiv");
-    const otpSection = document.getElementById("otp-section");
-    const otpInputsDiv = document.getElementById("otpInputs");
-    const timerText = document.getElementById("timerText");
-    const subtitle = document.getElementById("form-subtitle");
-    const readonlyValue = document.getElementById("readonlyValue");
-    const readonlyLabel = document.getElementById("readonlyLabel");
+    // ✅ Handle Send OTP
+    if (loginForm) {
+        loginForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const email = emailField.value.trim();
+            if (!email) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Missing Information",
+                    text: "Please enter a valid email or phone number!",
+                });
+                return;
+            }
 
-    function toggleLogin(method) {
-        selectedMethod = method;
-        methodSelection?.classList.add("d-none");
-        inputSection?.classList.remove("d-none");
-        emailInputDiv?.classList.toggle("d-none", method !== "email");
-        mobileInputDiv?.classList.toggle("d-none", method !== "mobile");
+            // Hide login form, show OTP form
+            loginForm.classList.add("d-none");
+            otpForm.classList.remove("d-none");
+
+            // populate verify email/phone
+            if (verifyEmail) verifyEmail.value = email;
+
+            // update subtitle
+            if (formSubtitle) formSubtitle.textContent = "Please verify your login details";
+
+            startTimer(); // start resend timer
+
+            // focus first OTP input
+            if (otpInputs && otpInputs.length) otpInputs[0].focus();
+        });
     }
 
-    loginEmailBtn?.addEventListener("click", () => toggleLogin("email"));
-    loginMobileBtn?.addEventListener("click", () => toggleLogin("mobile"));
+    // ✅ OTP Input Navigation
+    if (otpInputs && otpInputs.length) {
+        otpInputs.forEach((input, index) => {
+            input.addEventListener("input", () => {
+                input.value = input.value.replace(/[^0-9]/g, "");
+                if (input.value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
 
-    sendOtpBtn?.addEventListener("click", () => {
-        const value = selectedMethod === "email" ? (document.getElementById("issuerEmail")?.value || "").trim()
-            : (document.getElementById("issuerMobile")?.value || "").trim();
+            input.addEventListener("keydown", (event) => {
+                if (event.key === "Backspace" && !input.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                } else if (event.key === "ArrowLeft" && index > 0) {
+                    otpInputs[index - 1].focus();
+                } else if (event.key === "ArrowRight" && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+        });
+    }
 
-        if (!value) return alert(`Enter your ${selectedMethod}`);
+    // ✅ OTP Timer Logic
+    function startTimer() {
+        clearInterval(timer);
+        countdown = 60;
 
-        if (readonlyValue) readonlyValue.value = value;
-        if (readonlyLabel) readonlyLabel.textContent = selectedMethod === "email" ? "Email" : "Mobile";
-
-        // build OTP inputs
-        if (otpInputsDiv) {
-            otpInputsDiv.innerHTML = "";
-            const inputs = [];
-            for (let i = 0; i < 6; i++) {
-                const box = document.createElement("input");
-                box.type = "text";
-                box.maxLength = 1;
-                box.className = "otp-input";
-                otpInputsDiv.appendChild(box);
-                inputs.push(box);
-
-                box.addEventListener("input", () => {
-                    box.value = box.value.replace(/[^0-9]/g, "");
-                    if (box.value && i < 5) inputs[i + 1].focus();
-                });
-                box.addEventListener("keydown", (e) => {
-                    if (e.key === "Backspace" && !box.value && i > 0) inputs[i - 1].focus();
-                });
-            }
-            inputs[0]?.focus();
+        if (resendLink) {
+            resendLink.style.pointerEvents = "none";
+            resendLink.style.opacity = "0.6";
         }
+        if (timerText) timerText.textContent = `00:60`;
 
-        inputSection?.classList.add("d-none");
-        otpSection?.classList.remove("d-none");
-        if (subtitle) subtitle.textContent = "Please verify your login details";
-        startOtpTimer();
-    });
+        timer = setInterval(() => {
+            countdown--;
+            const seconds = countdown < 10 ? "0" + countdown : countdown;
+            if (timerText) timerText.textContent = `00:${seconds}`;
 
-    function startOtpTimer() {
-        let t = 60;
-        clearInterval(timerInterval);
-        resendText?.classList.add("disabled");
-        if (timerText) timerText.textContent = `Resend in 00:${t < 10 ? "0" + t : t}`;
-
-        timerInterval = setInterval(() => {
-            t--;
-            if (timerText) timerText.textContent = `Resend in 00:${t < 10 ? "0" + t : t}`;
-            if (t <= 0) {
-                clearInterval(timerInterval);
-                if (timerText) timerText.textContent = "";
-                resendText?.classList.remove("disabled");
+            if (countdown <= 0) {
+                clearInterval(timer);
+                if (resendLink) {
+                    resendLink.style.pointerEvents = "auto";
+                    resendLink.style.opacity = "1";
+                }
+                if (timerText) timerText.textContent = "00:00";
             }
         }, 1000);
     }
 
-    resendText?.addEventListener("click", () => {
-        if (!resendText.classList.contains("disabled")) {
-            startOtpTimer();
-            alert("OTP resent successfully");
-        }
-    });
+    // ✅ Handle Resend Click
+    if (resendLink) {
+        resendLink.addEventListener("click", () => {
+            if (resendLink.style.pointerEvents === "auto") {
+                Swal.fire({
+                    icon: "info",
+                    title: "OTP Resent",
+                    text: "A new OTP has been sent!",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                startTimer();
+            }
+        });
+    }
 
-    document.getElementById("cancelBtn")?.addEventListener("click", () => {
-        clearInterval(timerInterval);
-        otpSection?.classList.add("d-none");
-        inputSection?.classList.add("d-none");
-        methodSelection?.classList.remove("d-none");
-        if (subtitle) subtitle.textContent = "Please select your login method";
-    });
+    // ✅ Handle OTP Verification
+    if (otpForm) {
+        otpForm.addEventListener("submit", function (e) {
+            e.preventDefault();
 
-    loginBtn.addEventListener("click", () => {
-        const entered = [...(document.querySelectorAll("#otpInputs input") || [])]
-            .map(i => i.value).join("");
-        if (entered !== "123456") return alert("Invalid OTP");
-        localStorage.setItem("issuerLoggedIn", "1");
-        // keep issuerHome path relative to root
-        window.location.href = "issuerHome.html";
-    });
+            let enteredOTP = "";
+            otpInputs.forEach(input => enteredOTP += input.value);
+
+            if (enteredOTP.length < 6) {
+                Swal.fire({
+                    icon: "warning",
+                    title: "Incomplete OTP",
+                    text: "Please enter all 6 digits of the OTP.",
+                });
+                return;
+            }
+
+            if (enteredOTP === "123456") {
+                // Successful login (for demo)
+                Swal.fire({
+                    icon: "success",
+                    title: "Login Successful!",
+                    text: "Redirecting to your dashboard...",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                setTimeout(() => {
+                    localStorage.setItem("issuerLoggedIn", "1");
+                    window.location.href = "issuerHome.html";
+                }, 2000);
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid OTP",
+                    text: "Please try again.",
+                });
+                otpInputs.forEach(inp => inp.value = "");
+                if (otpInputs.length) otpInputs[0].focus();
+            }
+        });
+    }
 }
+
 
 // =========================
 // MASS UPLOAD TOGGLE (shared small helper)

@@ -4,7 +4,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initMassUpload();
     initSingleEarnerForm();
+    initPopovers();
 });
+
+// Popup for question mark icons
+function initPopovers() {
+    // Initialize all popovers
+    const popoverElements = document.querySelectorAll('[data-bs-toggle="popover"]');
+    const popovers = [...popoverElements].map(el => new bootstrap.Popover(el, {
+        trigger: 'click',
+        placement: 'right',
+        html: true,
+    }));
+
+    // Close all popovers when clicking outside
+    document.addEventListener('click', (event) => {
+        popoverElements.forEach((el) => {
+            const popover = bootstrap.Popover.getInstance(el);
+            if (!popover) return;
+
+            // If click target is outside both the popover trigger and popover content
+            if (!el.contains(event.target) && !document.querySelector('.popover')?.contains(event.target)) {
+                popover.hide();
+            }
+        });
+    });
+}
+
+
 
 /* -------------------- MASS UPLOAD -------------------- */
 function initMassUpload() {
@@ -34,12 +61,28 @@ function initMassUpload() {
     // Step 2: Validate CSV
     validateBtn.addEventListener("click", () => {
         const file = fileInput.files[0];
-        if (!file) return alert("Please select a CSV file first.");
+        if (!file) {
+            Swal.fire({
+                icon: "warning",
+                title: "No File Selected",
+                text: "Please select a CSV file first.",
+            });
+            return;
+        }
+
 
         const reader = new FileReader();
         reader.onload = () => {
             parsedRows = parseCSV(reader.result);
-            if (!parsedRows.length) return alert("Empty or invalid CSV file.");
+            if (!parsedRows.length) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Invalid CSV",
+                    text: "The selected CSV is empty or improperly formatted.",
+                });
+                return;
+            }
+
             showCsvPreview(parsedRows);
         };
         reader.readAsText(file);
@@ -68,7 +111,7 @@ function initMassUpload() {
         const footer = document.createElement("div");
         footer.className = "d-flex justify-content-center mt-3 gap-2";
         footer.innerHTML = `
-            <button class="btn btn-success" id="uploadCsvFinalBtn">Upload</button>
+            <button class="btn btn-primary" id="uploadCsvFinalBtn">Issue</button>
             <button class="btn btn-secondary" id="cancelCsvFinalBtn">Cancel</button>
         `;
         previewContainer.querySelector(".card-body").appendChild(footer);
@@ -77,7 +120,15 @@ function initMassUpload() {
         document.getElementById("uploadCsvFinalBtn").addEventListener("click", () => {
             const existing = JSON.parse(localStorage.getItem("earners") || "[]");
             localStorage.setItem("earners", JSON.stringify([...existing, ...parsedRows]));
-            alert(`✅ ${parsedRows.length} earners saved successfully.`);
+            Swal.fire({
+                icon: "success",
+                title: "Upload Successful",
+                text: `${parsedRows.length} earners saved successfully.`,
+                timer: 2000,
+                showConfirmButton: false
+            }).then(() => window.location.href = "earnerList.html");
+            return;
+
             window.location.href = "earnerList.html";
         });
 
@@ -90,24 +141,21 @@ function initMassUpload() {
 }
 
 /* -------------------- SINGLE EARNER FORM -------------------- */
+/* -------------------- SINGLE EARNER FORM -------------------- */
 function initSingleEarnerForm() {
     const tabs = [...document.querySelectorAll("#earnerFormTabs .nav-link")];
     const nextBtn = document.getElementById("nextTabBtn");
     const prevBtn = document.getElementById("prevTabBtn");
-    const validateBtn = document.getElementById("validateEarnerBtn");
+    const issueBtn = document.getElementById("validateEarnerBtn"); // renamed in UI to "Issue"
     const form = document.getElementById("earnerForm");
-    const previewContainer = document.getElementById("singlePreviewContainer");
-    const previewTable = document.getElementById("singlePreviewTable");
 
     if (!form) return;
-
-    let currentPreview = null;
 
     function showTab(index) {
         tabs[index].click();
         prevBtn.classList.toggle("d-none", index === 0);
         nextBtn.classList.toggle("d-none", index === tabs.length - 1);
-        validateBtn.classList.toggle("d-none", index !== tabs.length - 1);
+        issueBtn.classList.toggle("d-none", index !== tabs.length - 1);
     }
 
     nextBtn.addEventListener("click", () => {
@@ -122,60 +170,46 @@ function initSingleEarnerForm() {
 
     tabs.forEach((t, i) => t.addEventListener("shown.bs.tab", () => showTab(i)));
 
-    // Step 1: Validate on last tab
-    validateBtn.addEventListener("click", () => {
+    // ✅ Directly save to localStorage on Issue
+    issueBtn.addEventListener("click", () => {
         const inputs = form.querySelectorAll("input, select, textarea");
         const row = {};
         inputs.forEach((i) => (row[i.id] = i.value.trim()));
 
+        // Validation check
         if (!row.firstName || !row.lastName || !row.email || !row.badgeId || !row.issueDate || !row.orgLocation) {
-            return alert("Please fill in all required fields before validating.");
+            Swal.fire({
+                icon: "warning",
+                title: "Missing Fields",
+                text: "Please fill in all required fields before issuing the badge."
+            });
+            return;
         }
 
-        currentPreview = row;
+        // Save directly to localStorage
+        const existing = JSON.parse(localStorage.getItem("earners") || "[]");
+        existing.push(row);
+        localStorage.setItem("earners", JSON.stringify(existing));
 
-        // Step 2: Show preview with Upload + Cancel
-        previewContainer.classList.remove("d-none");
-        previewTable.innerHTML = "";
-
-        const thead = document.createElement("thead");
-        const tbody = document.createElement("tbody");
-        const trHead = document.createElement("tr");
-        const trBody = document.createElement("tr");
-
-        for (const [key, val] of Object.entries(row)) {
-            trHead.innerHTML += `<th>${escapeHtml(key)}</th>`;
-            trBody.innerHTML += `<td>${escapeHtml(val)}</td>`;
-        }
-
-        thead.appendChild(trHead);
-        tbody.appendChild(trBody);
-        previewTable.appendChild(thead);
-        previewTable.appendChild(tbody);
-
-        // Add Upload + Cancel buttons dynamically
-        const footer = document.createElement("div");
-        footer.className = "d-flex justify-content-center mt-3 gap-2";
-        footer.innerHTML = `
-            <button class="btn btn-success" id="uploadSingleFinalBtn">Upload</button>
-            <button class="btn btn-secondary" id="cancelSingleFinalBtn">Cancel</button>
-        `;
-        previewContainer.querySelector(".card-body").appendChild(footer);
-
-        // Upload → Save to localStorage
-        document.getElementById("uploadSingleFinalBtn").addEventListener("click", () => {
-            const existing = JSON.parse(localStorage.getItem("earners") || "[]");
-            existing.push(currentPreview);
-            localStorage.setItem("earners", JSON.stringify(existing));
-            alert("✅ Earner saved successfully.");
+        // Success popup
+        Swal.fire({
+            icon: "success",
+            title: "Badge Issued",
+            text: "Earner details have been saved successfully.",
+            timer: 2000,
+            showConfirmButton: false
+        }).then(() => {
             window.location.href = "earnerList.html";
         });
-
-        // Cancel → reload
-        document.getElementById("cancelSingleFinalBtn").addEventListener("click", () => location.reload());
     });
 }
 
+
+// ✅ Initialize Flatpickr for date fields
+flatpickr("#issueDate", {
+    dateFormat: "d-m-Y",
+    allowInput: true
+});
 /* -------------------- UTILITIES -------------------- */
 function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");

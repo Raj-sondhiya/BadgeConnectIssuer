@@ -1,53 +1,46 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-2 px-3">
-    <div class="container-fluid">
-        <!-- Left Section -->
-        <a class="navbar-brand d-flex align-items-center" href="issuerHome.html">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top py-2">
+    <div class="container-fluid px-4">
+        <!-- Company Name -->
+        <a class="navbar-brand fw-bold text-info d-flex align-items-center" href="issuerHome.html">
             <i class="fa-solid fa-certificate text-info fs-4 me-2"></i>
             <span class="fw-bold text-info">BadgeConnect</span>
         </a>
 
-        <!-- Toggler for mobile -->
+        <!-- Toggler for Mobile -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#issuerNavbar"
             aria-controls="issuerNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Navbar content -->
-        <div class="collapse navbar-collapse justify-content-end" id="issuerNavbar">
-            <ul class="navbar-nav align-items-center mauto" style="min-width: 570px;">
-
-                <li class="nav-item w-100">
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="issuerNavbar">
+            <ul class="navbar-nav ms-auto mb-lg-0 align-items-center">
+                <li class="nav-item">
                     <a class="nav-link fw-semibold" href="addEarner.html">
-                        <i class="fa-solid fa-user-plus me-1 text-info"></i> Add
+                        <i class="fa-solid fa-user-plus me-1 text-info"></i> Add Earner
                     </a>
                 </li>
-                <li class="nav-item w-100">
+
+                <li class="nav-item mx-1">
                     <a class="nav-link fw-semibold" href="earnerList.html">
-                        <i class="fa-solid fa-list me-1 text-info"></i> List
+                        <i class="fa-solid fa-list me-1 text-info"></i> Earner List
                     </a>
-                </li>
-                <!-- Search -->
-                <li class="nav-item me-3 w-100 w-md-auto">
-                    <form class="d-flex" role="search">
-                        <input class="form-control form-control-sm" type="search" placeholder="Search"
-                            aria-label="Search" style="min-width: 180px;">
-                    </form>
                 </li>
 
                 <!-- Profile + Welcome -->
-                <li class="nav-item d-flex align-items-center me-3">
+                <li class="nav-item d-flex align-items-center mx-2">
                     <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="profile"
-                        class="rounded-circle me-2" width="40" height="40">
+                        class="rounded-circle me-2" width="40" height="40" />
                     <div class="text-end">
                         <div class="fw-semibold">Welcome</div>
-                        <div class="small text-muted" id="issuerName">Issuer Name</div>
+                        <div class="small text-muted text-start" id="issuerName">Issuer Name</div>
                     </div>
                 </li>
 
                 <!-- Logout Button -->
-                <li class="nav-item">
-                    <button class="btn btn-outline-danger btn-sm" style="width: max-content;" id="logoutBtn"
-                        window.document.href="index.html">
+                <li class="nav-item mx-2">
+                    <button id="logoutBtn" class="btn btn-outline-danger btn-sm fw-semibold"
+                        onclick="document.location='index.html'">
                         <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
                     </button>
                 </li>

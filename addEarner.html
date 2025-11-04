@@ -12,6 +12,10 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
 
+    <!-- date picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="style.css" />
 </head>
@@ -23,9 +27,10 @@
 
     <main>
         <div class="container my-5">
+            <!-- header details -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="fw-bold text-secondary">Add Earner</h4>
-                <button class="btn btn-info text-white fw-semibold" id="addSingleEarnerBtn">
+                <button class="btn btn-primary text-white  " id="addSingleEarnerBtn">
                     <i class="fa-solid fa-user-plus me-2"></i>Issue to a new earner
                 </button>
             </div>
@@ -33,14 +38,14 @@
             <!-- Upload Section -->
             <div id="massUploadSection" class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h5 class="fw-semibold mb-3">Upload File</h5>
+                    <h5 class="  mb-3">Upload File</h5>
                     <div class="mb-3 d-flex align-items-center gap-2">
                         <i class="fa-solid fa-circle-question question-icon" data-bs-toggle="popover"
                             data-bs-content="Needs to be uploaded in CSV file UTF-8 format only (size less than 5 MB)"></i>
                         <i class="fa-solid fa-circle-question question-icon" data-bs-toggle="popover"
                             data-bs-content="Required fields: FirstName, LastName, EmailAddress, BadgeId, IssueDate. Other fields are optional."></i>
                         <a href="EarnerTemplate.csv" target="_blank">
-                            <i class="fa-brands fa-google-drive drive-icon" title="Open CSV Format"></i>
+                            <i title="Open CSV Format">Download CSV</i>
                         </a>
                     </div>
 
@@ -48,13 +53,13 @@
                         <input type="file" id="csvFileInput" accept=".csv" />
                     </div>
                     <div>
-                        <button class="btn btn-info fw-semibold w-100 mt-2" id="selectFileBtn">Upload CSV
+                        <button class="btn btn-primary   w-100 mt-2" id="selectFileBtn">Upload CSV
                             file</button>
 
                         <!-- Hidden action buttons -->
                         <div class="d-flex gap-2 mt-2 d-none" id="uploadActions">
-                            <button class="btn btn-success flex-fill" id="validateCsvBtn">Validate Data</button>
-                            <button class="btn btn-secondary flex-fill" id="cancelCsvBtn">Cancel</button>
+                            <button class="btn btn-secondary" id="cancelCsvBtn">Cancel</button>
+                            <button class="btn btn-primary" id="validateCsvBtn">Validate Data</button>
                         </div>
                     </div>
 
@@ -75,13 +80,13 @@
 
                     <div class="d-grid mt-3">
                         <!-- Keep existing visual appearance: mass-upload-btn replaced by our selectValidate -->
-                        <button class="btn mass-upload-btn fw-semibold d-none" id="legacyMassUploadBtn">Upload CSV
+                        <button class="btn mass-upload-btn   d-none" id="legacyMassUploadBtn">Upload CSV
                             file</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Container styled like first snippet -->
+            <!-- Issuer to a single earner form -->
             <div id="singleEarnerForm" class="card shadow-sm border-0 mt-4 mx-auto d-none">
                 <div class="card-body">
                     <button type="button" id="backToUploadBtn" class="btn btn-secondary mb-3">
@@ -108,22 +113,22 @@
                         <div class="tab-pane fade show active" id="earnerTab" role="tabpanel">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">First Name *</label>
-                                    <input type="text" id="first Name" class="form-control"
+                                    <label class="form-label  ">First Name *</label>
+                                    <input type="text" id="firstName" class="form-control"
                                         placeholder="Enter first name" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Last Name *</label>
+                                    <label class="form-label  ">Last Name *</label>
                                     <input type="text" id="lastName" class="form-control" placeholder="Enter last name"
                                         required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Email *</label>
+                                    <label class="form-label  ">Email *</label>
                                     <input type="email" id="email" class="form-control" placeholder="Enter email"
                                         required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Mobile</label>
+                                    <label class="form-label  ">Mobile</label>
                                     <input type="text" id="mobile" class="form-control"
                                         placeholder="Enter mobile number">
                                 </div>
@@ -134,14 +139,15 @@
                         <div class="tab-pane fade" id="badgeTab" role="tabpanel">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Badge ID *</label>
+                                    <label class="form-label  ">Badge ID *</label>
                                     <input type="text" id="badgeId" class="form-control" placeholder="Enter badge id"
                                         required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Issue Date *</label>
-                                    <input type="date" id="issueDate" class="form-control" placeholder="DD/MM/YYYY"
-                                        required>
+                                    <label class="form-label  ">Issue Date *</label>
+                                    <input type="text" id="issueDate" class="form-control"
+                                        placeholder="Enter badge issue date">
+
                                 </div>
                             </div>
                         </div>
@@ -150,12 +156,12 @@
                         <div class="tab-pane fade" id="orgTab" role="tabpanel">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Company Name</label>
+                                    <label class="form-label  ">Company Name</label>
                                     <input type="text" id="orgName" class="form-control"
                                         placeholder="Enter company name">
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Location *</label>
+                                    <label class="form-label  ">Location *</label>
                                     <input type="text" id="orgLocation" class="form-control"
                                         placeholder="Enter location" required>
                                 </div>
@@ -163,11 +169,12 @@
                         </div>
 
                         <!-- Navigation Buttons -->
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" id="prevTabBtn" class="btn btn-secondary d-none">Previous</button>
-                            <button type="button" id="nextTabBtn" class="btn btn-info text-white">Next</button>
-                            <button type="button" id="validateEarnerBtn" class="btn btn-outline-primary d-none">
-                                Validate
+                        <div class="d-flex mt-4">
+                            <button type="button" id="prevTabBtn"
+                                class="btn btn-secondary d-none ms-2">Previous</button>
+                            <button type="button" id="nextTabBtn" class="btn btn-primary text-white ms-2">Next</button>
+                            <button type="button" id="validateEarnerBtn" class="btn btn-primary d-none ms-2">
+                                Issue
                             </button>
 
                         </div>
@@ -196,6 +203,7 @@
 
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Custom JS -->
     <script src="issuer.js"></script>

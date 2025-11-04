@@ -81,12 +81,14 @@ body {
 .question-icon {
     color: #6c757d;
     cursor: pointer;
+    font-size: 1.1rem;
 }
 
-.drive-icon {
-    color: #007bff;
-    cursor: pointer;
+.question-icon:hover {
+    color: #0bb7dd;
 }
+
+
 
 
 .table thead th {

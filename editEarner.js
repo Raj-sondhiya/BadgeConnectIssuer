@@ -1,7 +1,12 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const draft = JSON.parse(localStorage.getItem("earnerEditDraft") || "{}");
     if (!draft.record) {
-        alert("No earner record found to edit.");
+        await Swal.fire({
+            icon: "error",
+            title: "No Record Found",
+            text: "No earner record found to edit.",
+            confirmButtonColor: "#0d6efd"
+        });
         window.location.href = "earnerList.html";
         return;
     }
@@ -19,14 +24,24 @@ document.addEventListener("DOMContentLoaded", () => {
         record.mobile || record["Mobile Number"] || "";
 
     // Handle cancel
-    document.getElementById("cancelBtn").addEventListener("click", () => {
-        if (confirm("Discard changes and go back?")) {
+    document.getElementById("cancelBtn").addEventListener("click", async () => {
+        const result = await Swal.fire({
+            icon: "warning",
+            title: "Discard Changes?",
+            text: "Your unsaved changes will be lost.",
+            showCancelButton: true,
+            confirmButtonText: "Yes, go back",
+            cancelButtonText: "Stay",
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#6c757d"
+        });
+        if (result.isConfirmed) {
             window.location.href = "earnerList.html";
         }
     });
 
     // Handle update
-    document.getElementById("editEarnerForm").addEventListener("submit", e => {
+    document.getElementById("editEarnerForm").addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const updated = {
@@ -42,7 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("earners", JSON.stringify(data));
         localStorage.removeItem("earnerEditDraft");
 
-        alert("Earner details updated successfully!");
+        await Swal.fire({
+            icon: "success",
+            title: "Updated Successfully!",
+            text: "Earner details have been updated.",
+            showConfirmButton: false,
+            timer: 1500
+        });
+
         window.location.href = "earnerList.html";
     });
 });
