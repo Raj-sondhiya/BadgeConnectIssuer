@@ -97,10 +97,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         }));
 
         return badges;
+
     }
+
+
 
     // Step 3: Render badges
     function renderBadges(badges) {
+        localStorage.setItem("issuerBadges", JSON.stringify(badges));
         badgesContainer.innerHTML = "";
 
         if (!badges.length) {

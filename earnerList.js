@@ -37,10 +37,12 @@ function renderEarnerList() {
     const company = e.orgName || e["Company"] || e["organization"] || "";
     const email = e.email || e["email"] || "";
     const contact = e.mobile || e["Mobile Number"] || e["contact"] || "";
-    const badgeId = e.badgeId || e["badge1"] || "";
-    const issueDate = e.issueDate || e["issuedate-b1"] || "";
+    // const badgeId = e.id || e["id"] || "";
+    const badgeCount = (e.badges && Array.isArray(e.badges)) ? e.badges.length : 0;
 
-    const badges = badgeId ? 1 : Math.floor(Math.random() * 5 + 1);
+    const issueDate = e.issueDate || e["issuedate-b1"] || e["issueDate"] || "";
+
+    // const badges = badgeId ? 1 : Math.floor(Math.random() * 5 + 1);
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -49,7 +51,7 @@ function renderEarnerList() {
         <td>${escapeHtml(fullName)}</td>
         <td>${escapeHtml(address)}</td>
         <td>${escapeHtml(company)}</td>
-        <td>${escapeHtml(badges)}</td>
+        <td>${badgeCount}</td>
         <td>${escapeHtml(contact)}</td>
         <td class="text-center">
             <i class="fa-solid fa-pen-to-square text-warning" style="cursor:pointer" onclick="editEarner(${i})"></i>
@@ -129,76 +131,116 @@ window.viewEarner = function (idx) {
   }
 
   const e = data[idx];
-  const firstName = e.firstName || e["First name"] || "";
-  const lastName = e.lastName || e["Last name"] || "";
-  const fullName = `${firstName} ${lastName}`.trim();
-  const email = e.email || e["email"] || "";
-  const contact = e.mobile || e["Mobile Number"] || "";
-  const company = e.orgName || e["Company"] || e["organization"] || "";
-  const address = e.orgLocation || e["location-b1"] || e["Location"] || "";
-  const issuer = e.issuerName || e["issuerName-b1"] || "";
-  const issueDate = e.issueDate || e["issuedate-b1"] || "";
-  const expiryDate = e.expDate || e["expDate-b1"] || "";
-  const notes = e.issuerNotes || e["issuerNotes-b1"] || "";
 
-  const badges = Object.keys(e)
-    .filter(k => k.toLowerCase().startsWith("badge") && e[k])
-    .map(k => e[k]);
+  const fullName = `${e.firstName || ""} ${e.lastName || ""}`.trim();
+  const email = e.email || "";
+  const contact = e.mobile || "";
+  const company = e.orgName || "";
+  const address = e.orgLocation || "";
+  const issuer = e.issuerName || "";
+  const issueDate = e.issueDate || "";
+  const expiryDate = e.expDate || "";
+  const notes = e.issuerNotes || "";
+
+  // ✅ Get badges
+  const earnedBadges = Array.isArray(e.badges) ? e.badges : [];
+
+  // ✅ Get all badge details from issuerHome cache
+  const masterBadges = JSON.parse(localStorage.getItem("issuerBadges") || "[]");
+
+  // ✅ Build badge display HTML
+  let badgeHtml = "—";
+  if (earnedBadges.length > 0) {
+    badgeHtml = `
+    <div class="d-flex flex-wrap gap-3">
+      ${earnedBadges.map((b) => {
+      const match = masterBadges.find(m => String(m.id) === String(b.id));
+      const img = match?.image || "";
+      const name = match?.name || b.name || "Unknown Badge";
+
+      return `
+          <div class="badgeCard position-relative text-center p-2" 
+               style="width:140px; border:1px solid #ddd; border-radius:8px; background:white;">
+            
+            <div class="badgeImgContainer position-relative" style="width:100%; height:100px;">
+              <img src="${img}" alt="${name}" 
+                   style="width:100%; height:100%; object-fit:contain; border-radius:6px;">
+              
+              <i class="fa-solid fa-repeat text-primary resendBadge position-absolute" 
+                 data-badgeid="${b.id}"
+                 title="Resend Badge"
+                 style="
+                   right:6px; 
+                   top:6px; 
+                   font-size:18px; 
+                   cursor:pointer; 
+                   display:none;
+                 ">
+              </i>
+            </div>
+
+            <div class="fw-semibold mt-2" style="font-size:14px;">${b.id}</div>
+            <div class="text-muted" style="font-size:13px;">${name}</div>
+          </div>
+        `;
+    }).join("")}
+    </div>
+  `;
+  }
+
 
   const body = document.getElementById("earnerDetailsBody");
   if (!body) return;
 
   body.innerHTML = `
-      <tr>
-        <td class="bg-info text-white fw-semibold" style="width: 30%;">Full Name</td>
-        <td>${escapeHtml(fullName)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Email</td>
-        <td>${escapeHtml(email)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Mobile Number</td>
-        <td>${escapeHtml(contact)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Organization / Company</td>
-        <td>${escapeHtml(company)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Address</td>
-        <td>${escapeHtml(address)}</td>
-      </tr>
+      <tr><td class="bg-info text-white fw-semibold" style="width:30%;">Full Name</td><td>${escapeHtml(fullName)}</td></tr>
+      <tr><td class="bg-info text-white fw-semibold">Email</td><td>${escapeHtml(email)}</td></tr>
+      <tr><td class="bg-info text-white fw-semibold">Mobile Number</td><td>${escapeHtml(contact)}</td></tr>
+      <tr><td class="bg-info text-white fw-semibold">Organization / Company</td><td>${escapeHtml(company)}</td></tr>
+      <tr><td class="bg-info text-white fw-semibold">Address</td><td>${escapeHtml(address)}</td></tr>
+      <tr><td class="bg-info text-white fw-semibold">Issuer</td><td>${escapeHtml(issuer)}</td></tr>
       <tr>
         <td class="bg-info text-white fw-semibold">Badges</td>
-        <td>
-          ${badges.length > 0
-      ? `<ul class="mb-0">${badges.map((b, i) => `<li><strong>Badge ${i + 1}:</strong> ${escapeHtml(b)}</li>`).join("")}</ul>`
-      : "—"}
-                  <i class="fa-solid fa-repeat text-primary ms-2" style="cursor:pointer" )"></i>
-        </td>
+        <td>${badgeHtml}</td>
       </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Issuer</td>
-        <td>${escapeHtml(issuer)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Issue Date</td>
-        <td>${escapeHtml(issueDate)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Expiry Date</td>
-        <td>${escapeHtml(expiryDate)}</td>
-      </tr>
-      <tr>
-        <td class="bg-info text-white fw-semibold">Issuer Notes</td>
-        <td>${escapeHtml(notes)}</td>
-      </tr>
-    `;
+  `;
 
   const modal = new bootstrap.Modal(document.getElementById("earnerViewModal"));
   modal.show();
+
+  // ✅ Resend Event Handler
+  setTimeout(() => {
+    // resend button click action
+    document.querySelectorAll(".resendBadge").forEach(btn => {
+      btn.addEventListener("click", () => {
+        Swal.fire({
+          icon: "success",
+          title: "Badge Resent",
+          text: "Badge resent successfully.",
+          timer: 2000,
+          showConfirmButton: false
+        });
+      });
+    });
+
+    // Show resend icon on hover
+    document.querySelectorAll(".badgeCard").forEach(card => {
+      card.addEventListener("mouseenter", () => {
+        const icon = card.querySelector(".resendBadge");
+        if (icon) icon.style.display = "block";
+      });
+      card.addEventListener("mouseleave", () => {
+        const icon = card.querySelector(".resendBadge");
+        if (icon) icon.style.display = "none";
+      });
+    });
+
+  }, 50);
+
+
+
 };
+
 
 // =========================
 // Small HTML escape utility

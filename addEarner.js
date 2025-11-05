@@ -3,9 +3,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!path.includes("addEarner.html") && !path.includes("add-earner")) return;
 
     initMassUpload();
-    initSingleEarnerForm();
     initPopovers();
     initMassUploadToggle();
+    initSingleEarnerForm();
+
+    // Badge validation on input
+    const badgeIdInput = document.getElementById("badgeId");
+    const badgeNameDisplay = document.createElement("div");
+    badgeNameDisplay.className = "mt-2 text-success fw-semibold";
+    badgeIdInput.parentNode.appendChild(badgeNameDisplay);
+
+    badgeIdInput.addEventListener("input", () => {
+        const badges = JSON.parse(localStorage.getItem("issuerBadges") || "[]");
+        const enteredId = badgeIdInput.value.trim();
+
+        const badge = badges.find(b => String(b.id).trim() === enteredId);
+
+        if (!badge) {
+            badgeNameDisplay.textContent = "";
+            return;
+        }
+
+        // badgeNameDisplay.textContent = `Badge Name: ${badge.name}`;
+    });
+
+
+
 });
 
 // Popup for question mark icons
@@ -152,7 +175,6 @@ function initSingleEarnerForm() {
     if (!accordion) return;
     let currentIndex = 0;
 
-    // Show accordion section by index
     function showSection(index) {
         panels.forEach((id, i) => {
             const section = document.getElementById(id);
@@ -174,7 +196,6 @@ function initSingleEarnerForm() {
         issueBtn.classList.toggle("d-none", index !== panels.length - 1);
     }
 
-    // Move between accordion sections
     nextBtn.addEventListener("click", () => {
         if (currentIndex < panels.length - 1) {
             currentIndex++;
@@ -189,7 +210,6 @@ function initSingleEarnerForm() {
         }
     });
 
-    // Sync buttons when user clicks accordion headers
     document.addEventListener("shown.bs.collapse", (e) => {
         const idx = panels.indexOf(e.target.id);
         if (idx >= 0) {
@@ -198,17 +218,62 @@ function initSingleEarnerForm() {
         }
     });
 
-    // Issue button: validate and save
-    issueBtn.addEventListener("click", () => {
-        const requiredFields = [
-            "firstName",
-            "lastName",
-            "email",
-            "badgeId",
-            "issueDate",
-            "orgLocation",
-        ];
+    // ---------- Live badge name display ----------
+    const badgeIdInput = document.getElementById("badgeId");
+    const badgeNameDisplay = document.createElement("div");
+    badgeNameDisplay.className = "mt-2 text-success fw-semibold";
+    badgeIdInput.parentNode.appendChild(badgeNameDisplay);
 
+    function getBadges() {
+        try { return JSON.parse(localStorage.getItem("issuerBadges") || "[]"); }
+        catch { return []; }
+    }
+    function findBadgeById(id) {
+        const entered = String(id || "").trim();
+        const list = getBadges();
+        return list.find(b => String(b.id).trim() === entered) || null;
+    }
+    function validateBadgeIdOrAlert() {
+        const id = badgeIdInput.value.trim();
+        const badge = findBadgeById(id);
+        if (!badge) {
+            Swal.fire({
+                icon: "error",
+                title: "Incorrect Badge ID",
+                text: "Badge does not exist.",
+            });
+            return false;
+        }
+        return true;
+    }
+
+    badgeIdInput.addEventListener("input", () => {
+        const badge = findBadgeById(badgeIdInput.value);
+        badgeNameDisplay.textContent = badge ? `Badge Name: ${badge.name}` : "";
+    });
+
+    // ---------- Gate Issue Date by badge validity ----------
+    const issueDateInput = document.getElementById("issueDate");
+    // On focus, block if badge invalid
+    issueDateInput.addEventListener("focus", (e) => {
+        if (!validateBadgeIdOrAlert()) {
+            // prevent user from picking a date if badge ID is wrong
+            e.preventDefault?.();
+            // flatpickr will usually open on focus; blur to close it
+            issueDateInput.blur();
+        }
+    });
+    // Also block click (covers some mobile/flatpickr cases)
+    issueDateInput.addEventListener("mousedown", (e) => {
+        if (!validateBadgeIdOrAlert()) {
+            e.preventDefault();
+            issueDateInput.blur();
+        }
+    });
+
+    // ---------- Issue action ----------
+    issueBtn.addEventListener("click", () => {
+        const requiredFields = ["firstName", "lastName", "email", "badgeId", "issueDate", "orgLocation"];
         let missing = [];
         const data = {};
 
@@ -219,7 +284,6 @@ function initSingleEarnerForm() {
             if (!value) missing.push(id);
         });
 
-        // Optional fields
         ["mobile", "orgName"].forEach((id) => {
             const el = document.getElementById(id);
             data[id] = el ? el.value.trim() : "";
@@ -234,9 +298,47 @@ function initSingleEarnerForm() {
             return;
         }
 
-        // Save to localStorage
-        const earners = JSON.parse(localStorage.getItem("earners") || "[]");
-        earners.push(data);
+        // Safety net: validate badge again on submit
+        const badge = findBadgeById(data.badgeId);
+        if (!badge) {
+            Swal.fire({
+                icon: "error",
+                title: "Incorrect Badge ID",
+                text: "Badge does not exist.",
+            });
+            return;
+        }
+
+        const earnedBadge = {
+            id: badge.id,
+            name: badge.name,
+            issueDate: data.issueDate
+        };
+
+        let earners = [];
+        try { earners = JSON.parse(localStorage.getItem("earners") || "[]"); }
+        catch { earners = []; }
+
+        const existing = earners.find(e => e.email === data.email);
+
+        if (existing) {
+            existing.badges = existing.badges || [];
+            existing.badges.push(earnedBadge);
+        } else {
+            const uniqueId = Math.floor(10000 + Math.random() * 90000).toString();
+            const newEarner = {
+                id: uniqueId,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                mobile: data.mobile,
+                orgName: data.orgName,
+                orgLocation: data.orgLocation,
+                badges: [earnedBadge]
+            };
+            earners.push(newEarner);
+        }
+
         localStorage.setItem("earners", JSON.stringify(earners));
 
         Swal.fire({
@@ -251,6 +353,12 @@ function initSingleEarnerForm() {
 
     showSection(currentIndex);
 }
+
+
+
+
+
+
 
 
 

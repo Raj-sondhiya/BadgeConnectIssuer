@@ -1,6 +1,5 @@
 // issuer.js
 // Contains: navbar loader, footer loader, login page + OTP logic
-// Vercel-safe: uses root-relative fetch and robust path checks
 
 document.addEventListener("DOMContentLoaded", async () => {
     const path = window.location.pathname || "/";
@@ -10,8 +9,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Page-specific init
     if (path.includes("index.html") || path === "/" || path.endsWith("/index")) initLoginPage();
-    // issuerHome.html remains as-is (no additional logic here)
-    // other pages have their own scripts
     // common toggle used by add-earner page too (no-op where not present)
 });
 
@@ -200,7 +197,7 @@ function initLoginPage() {
                 setTimeout(() => {
                     localStorage.setItem("issuerLoggedIn", "1");
                     window.location.href = "issuerHome.html";
-                }, 2000);
+                }, 1000);
             } else {
                 Swal.fire({
                     icon: "error",
