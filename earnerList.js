@@ -32,21 +32,18 @@ function renderEarnerList() {
     const firstName = e.firstName || e["First name"] || "";
     const lastName = e.lastName || e["Last name"] || "";
     const fullName = `${firstName} ${lastName}`.trim();
-
+    const profileId = e.id || e["id"] || "";
     const address = e.orgLocation || e["location-b1"] || e["Location"] || "";
     const company = e.orgName || e["Company"] || e["organization"] || "";
     const email = e.email || e["email"] || "";
     const contact = e.mobile || e["Mobile Number"] || e["contact"] || "";
-    // const badgeId = e.id || e["id"] || "";
     const badgeCount = (e.badges && Array.isArray(e.badges)) ? e.badges.length : 0;
 
     const issueDate = e.issueDate || e["issuedate-b1"] || e["issueDate"] || "";
 
-    // const badges = badgeId ? 1 : Math.floor(Math.random() * 5 + 1);
-
     const tr = document.createElement("tr");
     tr.innerHTML = `
-        <td>${i + 1}</td>
+        <td>${profileId}</td>
         <td>${escapeHtml(email)}</td>
         <td>${escapeHtml(fullName)}</td>
         <td>${escapeHtml(address)}</td>
@@ -66,6 +63,8 @@ function renderEarnerList() {
 // =========================
 // Actions: edit, delete, view
 // =========================
+
+// Edit - redirect to editEarner.html with draft in localStorage
 window.editEarner = async function (idx) {
   const data = JSON.parse(localStorage.getItem("earners") || "[]");
   if (!data[idx]) {
@@ -131,16 +130,13 @@ window.viewEarner = function (idx) {
   }
 
   const e = data[idx];
-
+  const profileId = e.id || e["id"] || "";
   const fullName = `${e.firstName || ""} ${e.lastName || ""}`.trim();
   const email = e.email || "";
   const contact = e.mobile || "";
   const company = e.orgName || "";
   const address = e.orgLocation || "";
   const issuer = e.issuerName || "";
-  const issueDate = e.issueDate || "";
-  const expiryDate = e.expDate || "";
-  const notes = e.issuerNotes || "";
 
   // ✅ Get badges
   const earnedBadges = Array.isArray(e.badges) ? e.badges : [];

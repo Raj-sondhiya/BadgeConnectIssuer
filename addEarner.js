@@ -252,7 +252,7 @@ function initSingleEarnerForm() {
         badgeNameDisplay.textContent = badge ? `Badge Name: ${badge.name}` : "";
     });
 
-    // ---------- Gate Issue Date by badge validity ----------
+    // ---------- Get Issue Date by badge validity ----------
     const issueDateInput = document.getElementById("issueDate");
     // On focus, block if badge invalid
     issueDateInput.addEventListener("focus", (e) => {
