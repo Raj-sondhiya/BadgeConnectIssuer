@@ -100,6 +100,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
+    function generateBadgeStats() {
+        const totalIssued = Math.floor(Math.random() * 9) + 1; // 1–9
+        const paidByEarner = Math.floor(Math.random() * (totalIssued + 1)); // 0–totalIssued
+        const unpaid = totalIssued - paidByEarner;
+
+        return { totalIssued, paidByEarner, unpaid };
+    }
+
 
 
     // Step 3: Render badges
@@ -113,18 +121,38 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         badges.forEach(badge => {
+            const { totalIssued, paidByEarner, unpaid } = generateBadgeStats();
+
             const col = document.createElement("div");
-            col.className = "col-6 col-md-4 col-lg-2 text-center";
+            col.className = "col-12 col-md-6 col-lg-4 col-xl-3";
             col.innerHTML = `
-        <div class="card border-0 shadow-sm rounded-3 p-2 h-100">
-          <img src="${badge.image}" alt="${badge.name}" class="img-fluid mb-2 rounded">
-          <p class="fw-bold small text-dark">${badge.id}</p>
-          <p class="fw-semibold small text-dark">${badge.name}</p>
+        <div class="card border-0 shadow-sm rounded-3" style="width:280px" >
+            <div class="d-flex align-items-center" style="gap:0; padding:0; margin:0;">
+
+                <!-- LEFT BLOCK -->
+                <div class="d-flex align-items-start" style="height:200px;">
+                    <div class="card border-0 shadow-sm rounded-3 p-2 h-100">
+                     <img src="${badge.image}" alt="${badge.name}" class="img-fluid mb-2 rounded">
+                    <span class="fw-semibold small text-dark">${badge.name}</span>
+                </div>
+
+                <!-- RIGHT BLOCK (vertically centered & no leading spaces) -->
+                <div style="width:150px;height:150px; justify-content:center; padding-left: 6px;
+                    display:flex;flex-direction:column;align-items:flex-start;">
+                    <span class="fw-semibold small text-dark">${badge.id}</span>
+                    <p class="small" style="margin:0; padding:0;">Total Issued: <span>${totalIssued}</span></p>
+                    <p class="small" style="margin:4px 0; padding:0;">Paid by Earner: <span>${paidByEarner}</span></p>
+                    <p class="small" style="margin:0; padding:0;">Unpaid: <span>${unpaid}</span></p>
+                </div>
+            </div>
+
+        </div>          
         </div>
-      `;
+        `;
             badgesContainer.appendChild(col);
         });
     }
+
 
     // Step 4: Pagination
     function renderPagination(totalBadges) {
