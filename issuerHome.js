@@ -140,18 +140,64 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <div style="width:150px;height:150px; justify-content:center; padding-left: 6px;
                     display:flex;flex-direction:column;align-items:flex-start;">
                     <span class="fw-semibold small text-dark">${badge.id}</span>
-                    <p class="small" style="margin:0; padding:0;">Total Issued: <span>${totalIssued}</span></p>
-                    <p class="small" style="margin:4px 0; padding:0;">Paid by Earner: <span>${paidByEarner}</span></p>
-                    <p class="small" style="margin:0; padding:0;">Unpaid: <span>${unpaid}</span></p>
+                    <p class="small badge-analytics issued" style="margin:0; cursor:pointer; text-decoration:underline;">
+                    Total Issued: <span>${totalIssued}</span></p>
+                    <p class="small badge-analytics paid" style="margin:4px 0; cursor:pointer; text-decoration:underline;">
+                    Paid by Earner: <span>${paidByEarner}</span></p>
+                    <p class="small badge-analytics unpaid" style="margin:0; cursor:pointer; text-decoration:underline;">
+                    Unpaid: <span>${unpaid}</span></p>
                 </div>
             </div>
-
         </div>          
         </div>
         `;
             badgesContainer.appendChild(col);
         });
     }
+
+    function openStatsPopup(title, includeReminder = false) {
+        const modalTitle = document.getElementById("badgeStatsTitle");
+        const tableBody = document.getElementById("badgeStatsTableBody");
+        const reminderHeader = document.getElementById("reminderColumnHeader");
+
+        modalTitle.textContent = title;
+        tableBody.innerHTML = "";
+
+        // Dummy data (replace later with real fetch)
+        const dummyList = [
+            { name: "Amit Verma", email: "amit@example.com" },
+            { name: "Sneha Sharma", email: "sneha@example.com" },
+            { name: "Rohit Singh", email: "rohit@example.com" }
+        ];
+
+        reminderHeader.style.display = includeReminder ? "" : "none";
+
+        dummyList.forEach(p => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+            <td>${p.name}</td>
+            <td>${p.email}</td>
+            ${includeReminder ? `<td><button class="btn btn-sm btn-warning">Send Reminder</button></td>` : ``}
+        `;
+            tableBody.appendChild(tr);
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById("badgeStatsModal"));
+        modal.show();
+    }
+
+    document.addEventListener("click", (e) => {
+        if (e.target.closest(".badge-analytics.issued")) {
+            openStatsPopup("Total Issued Badges");
+        }
+        if (e.target.closest(".badge-analytics.paid")) {
+            openStatsPopup("Paid By Earner");
+        }
+        if (e.target.closest(".badge-analytics.unpaid")) {
+            openStatsPopup("Unpaid Badges", true); // includes reminder button
+        }
+    });
+
 
 
     // Step 4: Pagination

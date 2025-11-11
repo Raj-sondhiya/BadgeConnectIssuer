@@ -119,16 +119,28 @@ function initMassUpload() {
         table.innerHTML = "";
 
         const keys = Object.keys(rows[0]);
+
+        // ✅ Add new column first
         const thead = document.createElement("thead");
-        thead.innerHTML = `<tr>${keys.map((k) => `<th>${escapeHtml(k)}</th>`).join("")}</tr>`;
+        thead.innerHTML = `
+        <tr>
+            <th>Incorrect Details</th>
+            ${keys.map(k => `<th>${escapeHtml(k)}</th>`).join("")}
+        </tr>
+    `;
         table.appendChild(thead);
 
         const tbody = document.createElement("tbody");
         rows.forEach((row) => {
             const tr = document.createElement("tr");
-            tr.innerHTML = keys.map((k) => `<td>${escapeHtml(row[k])}</td>`).join("");
+
+            // ✅ First column (red background)
+            tr.innerHTML = `<td style="background:red; color:white;">N/A</td>`
+                + keys.map(k => `<td>${escapeHtml(row[k])}</td>`).join("");
+
             tbody.appendChild(tr);
         });
+
         table.appendChild(tbody);
 
         // Replace bottom buttons with Upload + Cancel

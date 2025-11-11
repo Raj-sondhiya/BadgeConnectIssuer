@@ -41,6 +41,32 @@
         <!-- ✅ Badges Grid -->
         <div id="badgesContainer" class="row g-4"></div>
 
+        <!-- badge details popup -->
+
+        <div class="modal fade" id="badgeStatsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content" style="background:white;">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="badgeStatsTitle">Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th id="reminderColumnHeader" style="display:none;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="badgeStatsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <!-- ✅ Pagination -->
         <div id="paginationContainer" class="d-flex justify-content-center mt-4"></div>
     </main>

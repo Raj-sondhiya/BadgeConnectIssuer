@@ -153,11 +153,17 @@ window.viewEarner = function (idx) {
       const match = masterBadges.find(m => String(m.id) === String(b.id));
       const img = match?.image || "";
       const name = match?.name || b.name || "Unknown Badge";
+      // ✅ Random paid/unpaid label
+      const status = Math.random() < 0.5 ? "Paid" : "Unpaid";
+      const statusColor = status === "Paid" ? "green" : "red";
 
       return `
           <div class="badgeCard position-relative text-center p-2" 
                style="width:140px; border:1px solid #ddd; border-radius:8px; background:white;">
-            
+               <!-- ✅ Paid/Unpaid Label -->
+              <div class="fw-semibold" style="font-size:13px; color:${statusColor}; margin-bottom:4px;">
+                ${status}
+              </div>
             <div class="badgeImgContainer position-relative" style="width:100%; height:100px;">
               <img src="${img}" alt="${name}" 
                    style="width:100%; height:100%; object-fit:contain; border-radius:6px;">
@@ -166,15 +172,14 @@ window.viewEarner = function (idx) {
                  data-badgeid="${b.id}"
                  title="Resend Badge"
                  style="
-                   right:6px; 
-                   top:6px; 
+                   right: 0px;
+                   top: -12px;
                    font-size:18px; 
                    cursor:pointer; 
                    display:none;
                  ">
               </i>
             </div>
-
             <div class="fw-semibold mt-2" style="font-size:14px;">${b.id}</div>
             <div class="text-muted" style="font-size:13px;">${name}</div>
           </div>
@@ -232,9 +237,6 @@ window.viewEarner = function (idx) {
     });
 
   }, 50);
-
-
-
 };
 
 
