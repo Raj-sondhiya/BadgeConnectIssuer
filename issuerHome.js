@@ -100,6 +100,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     }
 
+    // ✅ Generate random two-digit badge stats (10–99)
+    function generateOverallStats() {
+        const totalIssued = Math.floor(Math.random() * 90) + 10; // 10–99
+        const paidByEarner = Math.floor(Math.random() * (totalIssued - 9)) + 5; // between 5–(total-5)
+        const unpaid = totalIssued - paidByEarner;
+
+        document.querySelector(".col-md-3:nth-child(1)").innerHTML = `
+        Total Badges Issued: <span class="fw-bold text-primary overall-stats issued" style="cursor:pointer;">${totalIssued}</span>
+    `;
+        document.querySelector(".col-md-3:nth-child(2)").innerHTML = `
+        Paid: <span class="fw-bold text-success overall-stats paid" style="cursor:pointer;">${paidByEarner}</span>
+    `;
+        document.querySelector(".col-md-3:nth-child(3)").innerHTML = `
+        Unpaid: <span class="fw-bold text-danger overall-stats unpaid" style="cursor:pointer;">${unpaid}</span>
+    `;
+    }
+
+
     function generateBadgeStats() {
         const totalIssued = Math.floor(Math.random() * 9) + 1; // 1–9
         const paidByEarner = Math.floor(Math.random() * (totalIssued + 1)); // 0–totalIssued
@@ -187,16 +205,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     document.addEventListener("click", (e) => {
-        if (e.target.closest(".badge-analytics.issued")) {
+        if (e.target.closest(".badge-analytics.issued") || e.target.closest(".overall-stats.issued")) {
             openStatsPopup("Total Issued Badges");
         }
-        if (e.target.closest(".badge-analytics.paid")) {
+        if (e.target.closest(".badge-analytics.paid") || e.target.closest(".overall-stats.paid")) {
             openStatsPopup("Paid By Earner");
         }
-        if (e.target.closest(".badge-analytics.unpaid")) {
-            openStatsPopup("Unpaid Badges", true); // includes reminder button
+        if (e.target.closest(".badge-analytics.unpaid") || e.target.closest(".overall-stats.unpaid")) {
+            openStatsPopup("Unpaid Badges", true);
         }
     });
+
 
 
 
@@ -275,4 +294,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("❌ Error:", err);
         badgesContainer.innerHTML = `<p class="text-center text-danger">Failed to load badges. Check console.</p>`;
     }
+    generateOverallStats();
+
 });

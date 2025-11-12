@@ -2,6 +2,65 @@
     width: 320px;
 }
 
+/* === Overall stats card === */
+/* === Overall Stats Card (Top Summary Section) === */
+.overallStats {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+    max-width: 1200px;
+}
+
+.overallStats .row {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    gap: 0;
+}
+
+.overallStats .col-md-3 {
+    flex: 1;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+    color: #333;
+    padding: 8px 0;
+}
+
+.overallStats .col-md-3 span {
+    font-weight: 700;
+    font-size: 17px;
+    margin-left: 6px;
+}
+
+.overallStats .col-md-3:nth-child(1) span {
+    color: #007bff;
+    /* blue */
+}
+
+.overallStats .col-md-3:nth-child(2) span {
+    color: #28a745;
+    /* green */
+}
+
+.overallStats .col-md-3:nth-child(3) span {
+    color: #dc3545;
+    /* red */
+}
+
+/* hover animation for clickable stats */
+.overallStats .col-md-3 span:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: 0.2s ease;
+}
+
+
 /* === Uniform Badge Grid === */
 #badgesContainer .card {
     display: flex;
