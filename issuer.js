@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // NAVBAR (async, safe)
 // =========================
 async function initNavbarIfNeeded(path) {
-    const pages = ["issuerHome.html", "addEarner.html", "earnerList.html", "add-earner.html"];
+    const pages = ["issuerHome.html", "addEarner.html", "earnerList.html", "add-earner.html", "badgeIssuedDetails.html"];
     if (!pages.some(p => path.includes(p))) return;
 
     try {

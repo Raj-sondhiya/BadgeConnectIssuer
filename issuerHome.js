@@ -205,9 +205,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     document.addEventListener("click", (e) => {
-        if (e.target.closest(".badge-analytics.issued") || e.target.closest(".overall-stats.issued")) {
-            openStatsPopup("Total Issued Badges");
+        if (e.target.closest(".badge-analytics.issued")) {
+            const card = e.target.closest(".card");
+            const badgeName = card.querySelector("span.small.text-dark").textContent.trim();
+            // const badgeId = card.querySelector("div > span.fw-semibold.small.text-dark").textContent.trim();
+
+            // Redirect with query params
+            window.location.href = `badgeIssuedDetails.html?name=${encodeURIComponent(badgeName)}`;
         }
+
         if (e.target.closest(".badge-analytics.paid") || e.target.closest(".overall-stats.paid")) {
             openStatsPopup("Paid By Earner");
         }

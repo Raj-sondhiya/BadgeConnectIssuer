@@ -154,7 +154,7 @@ window.viewEarner = function (idx) {
       const img = match?.image || "";
       const name = match?.name || b.name || "Unknown Badge";
       // ✅ Random paid/unpaid label
-      const status = Math.random() < 0.5 ? "Paid" : "Unpaid";
+      const status = Math.random() < 0.5 ? "Paid" : "Viewed";
       const statusColor = status === "Paid" ? "green" : "red";
 
       return `

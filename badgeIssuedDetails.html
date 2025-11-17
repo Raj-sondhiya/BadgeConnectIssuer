@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badge Issued Details</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- ✅ Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <!-- ✅ Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .heading {
+            font-weight: 700;
+            font-size: 22px;
+            color: #0794d1;
+        }
+
+        .table thead th {
+            background-color: #02a9f4;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        table tbody td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body class="layout-page">
+    <!-- ✅ Navbar Placeholder -->
+    <div id="navbar-placeholder"></div>
+    <main class="container my-1">
+        <div class="container mt-4">
+            <div class="page-box">
+                <h3 class="heading mb-3" id="badgeHeading"></h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead>
+                            <tr>
+                                <th>Profile ID</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Last Email Sent</th>
+                                <th>Last Viewed</th>
+                                <th>Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody id="issuerTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="footer-container"></div>
+
+    <script src="issuer.js"></script>
+
+    <script>
+        // Read badge name + id from URL
+        const params = new URLSearchParams(window.location.search);
+        const badgeName = params.get("name") || "Badge";
+        // const badgeId = params.get("id") || "000";
+
+        // Set heading
+        document.getElementById("badgeHeading").innerText = `${badgeName}`;
+
+        // Dummy names & emails
+        const dummyData = [
+            { name: "Amit Verma", email: "amit@example.com" },
+            { name: "Sneha Sharma", email: "sneha@example.com" },
+            { name: "Rohit Singh", email: "rohit@example.com" }
+        ];
+
+        // Random ID generator from your existing logic (adapted)
+        function randomProfileId() {
+            return Math.floor(10000 + Math.random() * 90000);
+        }
+
+        // Date-time generator
+        function randomDateTime() {
+            const d = new Date(Date.now() - Math.random() * 5 * 86400000);
+            return d.toLocaleString();
+        }
+
+        const tbody = document.getElementById("issuerTableBody");
+
+        dummyData.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+            <td>${randomProfileId()}</td>
+            <td>${row.email}</td>
+            <td>${row.name}</td>
+            <td></td>
+            <td>${randomDateTime()}</td>
+            <td>${randomDateTime()}</td>
+            <td>${randomDateTime()}</td>
+        `;
+            tbody.appendChild(tr);
+        });
+    </script>
+</body>
+
+</html>
